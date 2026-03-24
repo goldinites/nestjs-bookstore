@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { BookModule } from './book/book.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Book } from './book/book.entity';
 
 @Module({
   controllers: [AppController],
@@ -14,7 +15,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       port: 5433,
       password: '123456',
       username: 'root',
-      entities: [],
+      entities: [Book],
       database: 'nest-learn',
       synchronize: true,
       logging: true,

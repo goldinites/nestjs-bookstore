@@ -1,42 +1,44 @@
 import { Injectable } from '@nestjs/common';
-
-export interface Book {
-  id: number;
-  title: string;
-  author: string;
-}
+import { Book } from './book.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class BookService {
-  books: Book[];
-  constructor() {
-    this.books = [];
+  constructor(
+    @InjectRepository(Book)
+    private bookRepository: Repository<Book>,
+  ) {}
+
+  async getAll(): Promise<Book[]> {
+    return await this.bookRepository.find({ order: { id: 'ASC' } });
   }
 
-  getAll() {
-    return this.books;
+  async find(id: number): Promise<Book | null> {
+    return await this.bookRepository.findOneBy({ id });
   }
 
-  find(id: number) {
-    return this.books.find((book) => book.id === id);
+  async create(payload: Book): Promise<Book[]> {
+    await this.bookRepository.save(payload);
+
+    return await this.getAll();
   }
 
-  create(payload: Book) {
-    this.books.push(payload);
+  async update(payload: Partial<Book>): Promise<Book | null> {
+    if (!payload.id) return null;
 
-    return payload;
+    await this.bookRepository.update(payload.id, payload);
+
+    return await this.find(payload.id);
   }
 
-  update(payload: Book) {
-    const index = this.books.findIndex((book) => book.id === payload.id);
-    this.books[index] = payload;
+  async delete(id: number): Promise<boolean> {
+    if (!id) return false;
 
-    return this.books[index];
-  }
+    const { affected } = await this.bookRepository.delete(id);
 
-  delete(id: number) {
-    this.books = this.books.filter((book) => book.id !== id);
+    if (!affected) return false;
 
-    return this.books;
+    return affected > 0;
   }
 }

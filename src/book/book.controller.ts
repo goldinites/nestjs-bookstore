@@ -7,14 +7,15 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { type Book, BookService } from './book.service';
+import { BookService } from './book.service';
+import { Book } from './book.entity';
 
 @Controller('book')
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 
   @Get('list')
-  getAll(): Book[] {
+  getAll() {
     return this.bookService.getAll();
   }
 
@@ -29,7 +30,7 @@ export class BookController {
   }
 
   @Put('update')
-  update(@Body() payload: Book) {
+  update(@Body() payload: Partial<Book>) {
     return this.bookService.update(payload);
   }
 
