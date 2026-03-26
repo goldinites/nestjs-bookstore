@@ -1,0 +1,6 @@
+export enum BookErrors {
+  NOT_FOUND = 'Book not found',
+  NOT_CREATED = 'Book not created',
+  NOT_UPDATED = 'Book not updated',
+  NOT_DELETED = 'Book not deleted',
+}

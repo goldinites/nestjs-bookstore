@@ -9,16 +9,16 @@ import {
   Query,
 } from '@nestjs/common';
 import { BookService } from './book.service';
-import { Book } from './book.entity';
-import type { BookGetAllReqDto } from './book.types';
+import { Book } from './entities/book.entity';
+import type { BookGetAllReqDto } from './dto/get-all.dto';
 
 @Controller('book')
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 
   @Get('list')
-  getAll(@Query() params: BookGetAllReqDto) {
-    return this.bookService.getAll(params);
+  getList(@Query() params: BookGetAllReqDto) {
+    return this.bookService.getList(params);
   }
 
   @Get('get/:id')

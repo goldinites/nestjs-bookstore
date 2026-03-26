@@ -1,4 +1,4 @@
-import { Book } from './book.entity';
+import { Book } from '../entities/book.entity';
 
 export type BookGetAllReqDto = {
   field?: keyof Book;
