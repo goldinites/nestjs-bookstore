@@ -4,40 +4,45 @@ import {
   Delete,
   Get,
   Param,
+  ParseIntPipe,
   Post,
   Put,
   Query,
 } from '@nestjs/common';
 import { BookService } from './book.service';
-import { Book } from './entities/book.entity';
-import type { BookGetAllReqDto } from './dto/get-all.dto';
+import type { GetListBookReqDto } from './dto/get-list-book.dto';
+import type { CreateBookDto } from './dto/create-book.dto';
+import type { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('book')
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 
-  @Get('list')
-  getList(@Query() params: BookGetAllReqDto) {
+  @Get()
+  getList(@Query() params: GetListBookReqDto) {
     return this.bookService.getList(params);
   }
 
-  @Get('get/:id')
-  find(@Param('id') id: number) {
+  @Get('/:id')
+  find(@Param('id', ParseIntPipe) id: number) {
     return this.bookService.find(id);
   }
 
-  @Post('create')
-  create(@Body() payload: Book) {
+  @Post()
+  create(@Body() payload: CreateBookDto) {
     return this.bookService.create(payload);
   }
 
-  @Put('update/:id')
-  update(@Param('id') id: number, @Body() payload: Partial<Book>) {
+  @Put('/:id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: UpdateBookDto,
+  ) {
     return this.bookService.update(id, payload);
   }
 
-  @Delete('delete/:id')
-  delete(@Param('id') id: number) {
+  @Delete('/:id')
+  delete(@Param('id', ParseIntPipe) id: number) {
     return this.bookService.delete(id);
   }
 }

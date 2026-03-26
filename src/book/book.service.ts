@@ -6,10 +6,12 @@ import {
 import { Book } from './entities/book.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { BookGetAllReqDto } from './dto/get-all.dto';
-import { DeleteBookResDto } from './dto/delete.dto';
+import { GetListBookReqDto } from './dto/get-list-book.dto';
+import { DeleteBookResDto } from './dto/delete-book.dto';
 import { BookErrors } from './enums/errors.enum';
-import { getAllBooksDefaultsReq } from './constants/get-all.contants';
+import { getListBooksDefaultParams } from './constants/get-list-book.constants';
+import type { CreateBookDto } from './dto/create-book.dto';
+import type { UpdateBookDto } from './dto/update-book.dto';
 
 @Injectable()
 export class BookService {
@@ -18,9 +20,9 @@ export class BookService {
     private bookRepository: Repository<Book>,
   ) {}
 
-  async getList(params?: BookGetAllReqDto): Promise<Book[]> {
+  async getList(params?: GetListBookReqDto): Promise<Book[]> {
     const { field, direction, limit, offset } = {
-      ...getAllBooksDefaultsReq,
+      ...getListBooksDefaultParams,
       ...params,
     };
 
@@ -37,15 +39,13 @@ export class BookService {
     return await this.bookRepository.findOneBy({ id });
   }
 
-  async create(payload: Book): Promise<Book[]> {
+  async create(payload: CreateBookDto): Promise<Book> {
     if (!payload) throw new BadRequestException(BookErrors.NOT_CREATED);
 
-    await this.bookRepository.save(payload);
-
-    return await this.getList();
+    return await this.bookRepository.save(payload);
   }
 
-  async update(id: number, payload: Partial<Book>): Promise<Book | null> {
+  async update(id: number, payload: UpdateBookDto): Promise<Book | null> {
     if (!id) throw new NotFoundException(BookErrors.NOT_FOUND);
 
     const updated = await this.bookRepository.update(id, payload);

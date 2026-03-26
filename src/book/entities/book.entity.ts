@@ -23,7 +23,7 @@ export class Book {
   @Column()
   stockCount: number;
 
-  @Column({ type: 'numeric', nullable: true })
+  @Column({ type: 'float', nullable: true })
   rating: number | null;
 
   @Column({ type: 'numeric', nullable: true })
