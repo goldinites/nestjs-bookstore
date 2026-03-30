@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Book } from '@/modules/book/entities/book.entity';
 import { AppController } from '@/modules/app/app.controller';
 import { AppService } from '@/modules/app/app.service';
+import { User } from '@/modules/user/entities/user.entity';
+import { AuthModule } from '@/modules/auth/auth.module';
+import { UserModule } from '@/modules/user/user.module';
 
 @Module({
   controllers: [AppController],
@@ -15,11 +18,13 @@ import { AppService } from '@/modules/app/app.service';
       port: 5433,
       password: '123456',
       username: 'root',
-      entities: [Book],
+      entities: [Book, User],
       database: 'nest-learn',
       synchronize: true,
       logging: true,
     }),
+    AuthModule,
+    UserModule,
     BookModule,
   ],
 })

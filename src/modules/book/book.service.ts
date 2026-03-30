@@ -54,9 +54,7 @@ export class BookService {
 
     const { affected } = await this.bookRepository.update(id, payload);
 
-    if (affected === 0) {
-      throw new BadRequestException(BookErrors.NOT_UPDATED);
-    }
+    if (affected === 0) throw new BadRequestException(BookErrors.NOT_UPDATED);
 
     return await this.find(id);
   }
@@ -66,9 +64,7 @@ export class BookService {
 
     const { affected } = await this.bookRepository.delete(id);
 
-    if (!affected) {
-      throw new BadRequestException(BookErrors.NOT_DELETED);
-    }
+    if (!affected) throw new BadRequestException(BookErrors.NOT_DELETED);
 
     return { success: true };
   }

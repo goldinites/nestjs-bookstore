@@ -1,6 +1,7 @@
-import { Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { Roles } from '@/modules/user/enums/roles.enum';
 
+@Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
@@ -14,7 +15,7 @@ export class User {
   @Column({ length: 128 })
   email: string;
 
-  @Column({ length: 60 })
+  @Column({ length: 256 })
   password: string;
 
   @Column({ type: 'enum', enum: Roles, default: Roles.GHOST })

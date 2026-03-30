@@ -1,8 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from '@/modules/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserErrors } from '@/modules/user/enums/errors.enum';
+import type { DeleteUserResponse } from '@/modules/user/types/delete-user.type';
+import type { CreateUserDto } from '@/modules/user/dto/create-user.dto';
+import { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -17,5 +24,41 @@ export class UserService {
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 
     return user;
+  }
+
+  async findById(id: number): Promise<User> {
+    const user: User | null = await this.userRepository.findOneBy({ id });
+
+    if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
+
+    return user;
+  }
+
+  async create(payload: CreateUserDto): Promise<User> {
+    const user: User = this.userRepository.create(payload);
+
+    if (!user) throw new BadRequestException(UserErrors.NOT_CREATED);
+
+    return await this.userRepository.save(user);
+  }
+
+  async update(id: number, payload: UpdateUserDto): Promise<User | null> {
+    await this.findById(id);
+
+    const { affected } = await this.userRepository.update(id, payload);
+
+    if (affected === 0) throw new BadRequestException(UserErrors.NOT_UPDATED);
+
+    return await this.findById(id);
+  }
+
+  async delete(id: number): Promise<DeleteUserResponse> {
+    await this.findById(id);
+
+    const { affected } = await this.userRepository.delete(id);
+
+    if (affected === 0) throw new BadRequestException(UserErrors.NOT_DELETED);
+
+    return { success: true };
   }
 }
