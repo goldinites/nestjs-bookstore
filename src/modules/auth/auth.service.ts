@@ -13,6 +13,7 @@ import { SafeUser } from '@/modules/auth/types/register.type';
 import { AuthErrors } from '@/modules/auth/enums/errors.enum';
 import { getSafeUser } from '@/modules/auth/utils/get-safe-user';
 import { TokenPayload } from '@/modules/auth/types/token-payload.type';
+import { SignInResponse } from '@/modules/auth/types/sign-in.type';
 
 @Injectable()
 export class AuthService {
@@ -26,9 +27,8 @@ export class AuthService {
       .findByEmail(payload.email)
       .catch(() => null);
 
-    if (existingUser) {
+    if (existingUser)
       throw new ConflictException(AuthErrors.USER_ALREADY_EXISTS);
-    }
 
     const hashedPassword: string = await argon2.hash(payload.password);
 
@@ -40,7 +40,7 @@ export class AuthService {
     return getSafeUser(user);
   }
 
-  async signIn(payload: SignInDto) {
+  async signIn(payload: SignInDto): Promise<SignInResponse> {
     const user: User = await this.userService.findByEmail(payload.email);
 
     const isMatch: boolean = await argon2.verify(

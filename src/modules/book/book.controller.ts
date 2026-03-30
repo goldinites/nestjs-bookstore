@@ -9,6 +9,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { BookService } from '@/modules/book/book.service';
 import { GetListBookReqDto } from '@/modules/book/dto/get-list-book.dto';
@@ -16,7 +17,13 @@ import { CreateBookDto } from '@/modules/book/dto/create-book.dto';
 import { UpdateBookDto } from '@/modules/book/dto/update-book.dto';
 import { Book } from '@/modules/book/entities/book.entity';
 import { DeleteBookResponse } from '@/modules/book/types/delete-book.type';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import { RolesGuard } from '@/modules/auth/guards/roles.guard';
+import { Permissions } from '@/modules/auth/decorators/permissions.decorator';
+import { Roles } from '@/modules/user/enums/roles.enum';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Permissions(Roles.ADMIN)
 @Controller('book')
 export class BookController {
   constructor(private readonly bookService: BookService) {}
