@@ -4,6 +4,7 @@ import { SignInDto } from '@/modules/auth/dto/sign-in.dto';
 import { RegisterDto } from '@/modules/auth/dto/register.dto';
 import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import type { AuthUser } from '@/modules/auth/types/auth-user.type';
 
 @Controller('auth')
 export class AuthController {
@@ -21,7 +22,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
-  me(@CurrentUser() user: { userId: number }) {
-    return this.authService.me(user.userId);
+  me(@CurrentUser() { userId }: AuthUser) {
+    return this.authService.me(userId);
   }
 }

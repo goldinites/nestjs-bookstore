@@ -1,7 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '@/modules/app/app.module';
-import { DEFAULT_PORT } from '@/modules/app/constants/app.constants';
+import { DEFAULT_APP_PORT } from '@/modules/app/constants/app.constants';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
@@ -14,7 +14,7 @@ async function bootstrap(): Promise<void> {
     }),
   );
 
-  await app.listen(process.env.PORT ?? DEFAULT_PORT);
+  await app.listen(process.env.PORT ?? DEFAULT_APP_PORT);
 }
 
 bootstrap().catch((err) => console.error('log:', err));

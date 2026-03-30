@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { jwtConstants } from '@/modules/auth/constants/auth.constants';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '@/modules/user/user.module';
 import { JwtStrategy } from '@/modules/auth/strategies/jwt-authorization-strategy';
@@ -11,8 +10,8 @@ import { JwtStrategy } from '@/modules/auth/strategies/jwt-authorization-strateg
     UserModule,
     JwtModule.register({
       global: true,
-      secret: jwtConstants.secret,
-      signOptions: { expiresIn: '60s' },
+      secret: process.env.JWT_SECRET,
+      signOptions: { expiresIn: Number(process.env.JWT_EXPIRES_IN) },
     }),
   ],
   controllers: [AuthController],

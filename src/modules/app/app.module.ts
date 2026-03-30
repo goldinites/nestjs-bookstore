@@ -7,17 +7,21 @@ import { AppService } from '@/modules/app/app.service';
 import { User } from '@/modules/user/entities/user.entity';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UserModule } from '@/modules/user/user.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   controllers: [AppController],
   providers: [AppService],
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     TypeOrmModule.forRoot({
       type: 'postgres',
-      host: 'localhost',
-      port: 5433,
-      password: '123456',
-      username: 'root',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      password: process.env.DB_PASSWORD,
+      username: process.env.DB_USERNAME,
       entities: [Book, User],
       database: 'nest-learn',
       synchronize: true,
