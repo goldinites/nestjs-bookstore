@@ -37,12 +37,14 @@ export class UserService {
   async create(payload: CreateUserDto): Promise<User> {
     const user: User = this.userRepository.create(payload);
 
-    if (!user) throw new BadRequestException(UserErrors.NOT_CREATED);
+    const created: User = await this.userRepository.save(user);
 
-    return await this.userRepository.save(user);
+    if (!created) throw new BadRequestException(UserErrors.NOT_CREATED);
+
+    return created;
   }
 
-  async update(id: number, payload: UpdateUserDto): Promise<User | null> {
+  async update(id: number, payload: UpdateUserDto): Promise<User> {
     await this.findById(id);
 
     const { affected } = await this.userRepository.update(id, payload);
