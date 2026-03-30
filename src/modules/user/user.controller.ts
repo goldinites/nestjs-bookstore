@@ -23,12 +23,12 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('get-by-id/:id')
-  findById(@Param('id', ParseIntPipe) id: number): Promise<User> {
+  findById(@Param('id', ParseIntPipe) id: number): Promise<User | null> {
     return this.userService.findById(id);
   }
 
   @Get('get-by-email/:email')
-  findByEmail(@Param('email', ParseIntPipe) email: string): Promise<User> {
+  findByEmail(@Param('email') email: string): Promise<User | null> {
     return this.userService.findByEmail(email);
   }
 
@@ -41,7 +41,7 @@ export class UserController {
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: UpdateUserDto,
-  ): Promise<User> {
+  ): Promise<User | null> {
     return this.userService.update(id, payload);
   }
 

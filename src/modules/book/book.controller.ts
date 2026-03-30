@@ -47,12 +47,10 @@ export class BookController {
   async import(
     @Body(new ParseArrayPipe({ items: CreateBookDto }))
     payload: CreateBookDto[],
-  ): Promise<void> {
-    if (payload.length === 0) return;
+  ): Promise<Book[]> {
+    if (payload.length === 0) return [];
 
-    for (const book of payload) {
-      await this.bookService.create(book);
-    }
+    return await this.bookService.import(payload);
   }
 
   @Patch(':id')

@@ -49,6 +49,14 @@ export class BookService {
     return await this.bookRepository.save(book);
   }
 
+  async import(payload: CreateBookDto[]): Promise<Book[]> {
+    const books: Book[] = this.bookRepository.create(payload);
+
+    if (books.length === 0) return [];
+
+    return await this.bookRepository.save(books);
+  }
+
   async update(id: number, payload: UpdateBookDto): Promise<Book> {
     await this.find(id);
 

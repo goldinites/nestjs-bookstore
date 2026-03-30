@@ -1,6 +1,7 @@
 import {
   ConflictException,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from '@/modules/user/user.service';
@@ -14,6 +15,7 @@ import { AuthErrors } from '@/modules/auth/enums/errors.enum';
 import { getSafeUser } from '@/modules/auth/utils/get-safe-user';
 import { TokenPayload } from '@/modules/auth/types/token-payload.type';
 import { SignInResponse } from '@/modules/auth/types/sign-in.type';
+import { UserErrors } from '@/modules/user/enums/errors.enum';
 
 @Injectable()
 export class AuthService {
@@ -41,14 +43,16 @@ export class AuthService {
   }
 
   async signIn(payload: SignInDto): Promise<SignInResponse> {
-    const user: User = await this.userService.findByEmail(payload.email);
+    const user: User | null = await this.userService.findByEmail(payload.email);
+
+    if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 
     const isMatch: boolean = await argon2.verify(
       user.password,
       payload.password,
     );
 
-    if (!isMatch) throw new UnauthorizedException();
+    if (!isMatch) throw new UnauthorizedException(AuthErrors.WRONG_CREDENTIALS);
 
     const tokenPayload: TokenPayload = {
       sub: user.id,
@@ -62,7 +66,9 @@ export class AuthService {
   }
 
   async me(id: number): Promise<SafeUser> {
-    const user: User = await this.userService.findById(id);
+    const user: User | null = await this.userService.findById(id);
+
+    if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 
     return getSafeUser(user);
   }

@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { User } from '@/modules/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,20 +14,12 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
-  async findByEmail(email: string): Promise<User> {
-    const user: User | null = await this.userRepository.findOneBy({ email });
-
-    if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
-
-    return user;
+  async findByEmail(email: string): Promise<User | null> {
+    return await this.userRepository.findOneBy({ email });
   }
 
-  async findById(id: number): Promise<User> {
-    const user: User | null = await this.userRepository.findOneBy({ id });
-
-    if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
-
-    return user;
+  async findById(id: number): Promise<User | null> {
+    return await this.userRepository.findOneBy({ id });
   }
 
   async create(payload: CreateUserDto): Promise<User> {
@@ -44,7 +32,7 @@ export class UserService {
     return created;
   }
 
-  async update(id: number, payload: UpdateUserDto): Promise<User> {
+  async update(id: number, payload: UpdateUserDto): Promise<User | null> {
     await this.findById(id);
 
     const { affected } = await this.userRepository.update(id, payload);
