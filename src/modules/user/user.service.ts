@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserErrors } from '@/modules/user/enums/errors.enum';
 import type { DeleteUserResponse } from '@/modules/user/types/delete-user.type';
 import type { CreateUserDto } from '@/modules/user/dto/create-user.dto';
-import { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
+import type { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
 
 @Injectable()
 export class UserService {

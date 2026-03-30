@@ -22,5 +22,5 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsEnum(Roles)
-  role?: string;
+  role?: Roles;
 }

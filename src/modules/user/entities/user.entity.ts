@@ -18,6 +18,6 @@ export class User {
   @Column({ length: 256 })
   password: string;
 
-  @Column({ type: 'enum', enum: Roles, default: Roles.GHOST })
+  @Column({ type: 'enum', enum: Roles, default: Roles.USER })
   role: Roles;
 }

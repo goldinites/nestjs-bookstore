@@ -33,7 +33,7 @@ export class BookService {
     });
   }
 
-  async find(id: number): Promise<Book | null> {
+  async find(id: number): Promise<Book> {
     const book: Book | null = await this.bookRepository.findOneBy({ id });
 
     if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
@@ -49,7 +49,7 @@ export class BookService {
     return await this.bookRepository.save(book);
   }
 
-  async update(id: number, payload: UpdateBookDto): Promise<Book | null> {
+  async update(id: number, payload: UpdateBookDto): Promise<Book> {
     await this.find(id);
 
     const { affected } = await this.bookRepository.update(id, payload);
