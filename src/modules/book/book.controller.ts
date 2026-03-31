@@ -49,8 +49,6 @@ export class BookController {
     @Body(new ParseArrayPipe({ items: CreateBookDto }))
     payload: CreateBookDto[],
   ): Promise<Book[]> {
-    if (payload.length === 0) return [];
-
     return await this.bookService.import(payload);
   }
 

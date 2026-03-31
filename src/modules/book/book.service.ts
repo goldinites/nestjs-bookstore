@@ -75,7 +75,7 @@ export class BookService {
 
     const { affected } = await this.bookRepository.delete(id);
 
-    if (!affected) throw new BadRequestException(BookErrors.NOT_DELETED);
+    if (affected === 0) throw new BadRequestException(BookErrors.NOT_DELETED);
 
     return { success: true };
   }
