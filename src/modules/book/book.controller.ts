@@ -12,7 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { BookService } from '@/modules/book/book.service';
-import { GetBookReqDto } from '@/modules/book/dto/get-list-book.dto';
+import { GetBookReqDto } from '@/modules/book/dto/get-book.dto';
 import { CreateBookDto } from '@/modules/book/dto/create-book.dto';
 import { UpdateBookDto } from '@/modules/book/dto/update-book.dto';
 import { Book } from '@/modules/book/entities/book.entity';

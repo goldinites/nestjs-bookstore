@@ -2,8 +2,8 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from '@/modules/book/entities/book.entity';
 import { Repository } from 'typeorm';
-import { GetBookReqDto } from '@/modules/book/dto/get-list-book.dto';
-import { getListBooksDefaultParams } from '@/modules/book/constants/get-list-book.constants';
+import { GetBookReqDto } from '@/modules/book/dto/get-book.dto';
+import { getBookDefaultParams } from '@/modules/book/constants/get-book.constants';
 import { BookErrors } from '@/modules/book/enums/errors.enum';
 import { CreateBookDto } from '@/modules/book/dto/create-book.dto';
 import { UpdateBookDto } from '@/modules/book/dto/update-book.dto';
@@ -18,7 +18,7 @@ export class BookService {
 
   async find(query?: GetBookReqDto): Promise<Book[]> {
     const { field, direction, limit, offset, ...where } = {
-      ...getListBooksDefaultParams,
+      ...getBookDefaultParams,
       ...query,
     };
 

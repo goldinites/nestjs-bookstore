@@ -1,6 +1,6 @@
-import { GetBookReqDto } from '@/modules/book/dto/get-list-book.dto';
+import { GetBookReqDto } from '@/modules/book/dto/get-book.dto';
 
-export const getListBooksDefaultParams: Required<
+export const getBookDefaultParams: Required<
   Pick<GetBookReqDto, 'field' | 'direction' | 'limit' | 'offset'>
 > = {
   field: 'id',
