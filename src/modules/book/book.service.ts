@@ -12,19 +12,27 @@ import { BookErrors } from '@/modules/book/enums/errors.enum';
 import { CreateBookDto } from '@/modules/book/dto/create-book.dto';
 import { UpdateBookDto } from '@/modules/book/dto/update-book.dto';
 import { DeleteBookResponse } from '@/modules/book/types/delete-book.type';
+import { normalizeQueryWhere } from '@/modules/utils/normalize-query-where';
 
 @Injectable()
 export class BookService {
+  multiValueFields: string[] = ['publishedYear', 'genre', 'language'] as const;
+
   constructor(
     @InjectRepository(Book)
     private bookRepository: Repository<Book>,
   ) {}
 
   async find(query?: GetBookReqDto): Promise<Book[]> {
-    const { field, direction, limit, offset, ...where } = {
+    const { field, direction, limit, offset, ...rest } = {
       ...getBookDefaultParams,
       ...query,
     };
+
+    const where = normalizeQueryWhere<GetBookReqDto, Book>(
+      rest,
+      this.multiValueFields,
+    );
 
     return await this.bookRepository.find({
       where,
@@ -34,8 +42,8 @@ export class BookService {
     });
   }
 
-  async findOne(query: GetBookReqDto): Promise<Book | null> {
-    return await this.bookRepository.findOneBy(query);
+  async findById(id: number): Promise<Book | null> {
+    return await this.bookRepository.findOneBy({ id });
   }
 
   async create(payload: CreateBookDto): Promise<Book> {
@@ -53,7 +61,7 @@ export class BookService {
   }
 
   async update(id: number, payload: UpdateBookDto): Promise<Book | null> {
-    const book: Book | null = await this.findOne({ id });
+    const book: Book | null = await this.findById(id);
 
     if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
 
@@ -61,7 +69,7 @@ export class BookService {
 
     if (affected === 0) throw new BadRequestException(BookErrors.NOT_UPDATED);
 
-    const updated: Book | null = await this.findOne({ id });
+    const updated: Book | null = await this.findById(id);
 
     if (!updated) throw new NotFoundException(BookErrors.NOT_FOUND);
 
@@ -69,7 +77,7 @@ export class BookService {
   }
 
   async delete(id: number): Promise<DeleteBookResponse> {
-    const book: Book | null = await this.findOne({ id });
+    const book: Book | null = await this.findById(id);
 
     if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
 

@@ -25,9 +25,9 @@ export class AuthService {
   ) {}
 
   async register(payload: RegisterDto): Promise<SafeUser> {
-    const existingUser: User | null = await this.userService.findOne({
-      email: payload.email,
-    });
+    const existingUser: User | null = await this.userService.findByEmail(
+      payload.email,
+    );
 
     if (existingUser)
       throw new ConflictException(AuthErrors.USER_ALREADY_EXISTS);
@@ -36,9 +36,7 @@ export class AuthService {
   }
 
   async signIn(payload: SignInDto): Promise<SignInResponse> {
-    const user: User | null = await this.userService.findOne({
-      email: payload.email,
-    });
+    const user: User | null = await this.userService.findByEmail(payload.email);
 
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 
@@ -61,7 +59,7 @@ export class AuthService {
   }
 
   async me(id: number): Promise<SafeUser> {
-    const user: User | null = await this.userService.findOne({ id });
+    const user: User | null = await this.userService.findById(id);
 
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 

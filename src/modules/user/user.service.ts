@@ -37,8 +37,12 @@ export class UserService {
     });
   }
 
-  async findOne(params: GetUserReqDto): Promise<User | null> {
-    return await this.userRepository.findOneBy(params);
+  async findById(id: number): Promise<User | null> {
+    return await this.userRepository.findOneBy({ id });
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    return await this.userRepository.findOneBy({ email });
   }
 
   async create(payload: CreateUserDto): Promise<SafeUser> {
@@ -55,7 +59,7 @@ export class UserService {
   }
 
   async update(id: number, payload: UpdateUserDto): Promise<SafeUser | null> {
-    const user: User | null = await this.findOne({ id });
+    const user: User | null = await this.findById(id);
 
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 
@@ -63,7 +67,7 @@ export class UserService {
 
     if (affected === 0) throw new BadRequestException(UserErrors.NOT_UPDATED);
 
-    const updated: User | null = await this.findOne({ id });
+    const updated: User | null = await this.findById(id);
 
     if (!updated) throw new NotFoundException(UserErrors.NOT_FOUND);
 
@@ -71,7 +75,7 @@ export class UserService {
   }
 
   async delete(id: number): Promise<DeleteUserResponse> {
-    const user: User | null = await this.findOne({ id });
+    const user: User | null = await this.findById(id);
 
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 

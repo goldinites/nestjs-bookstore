@@ -29,7 +29,7 @@ export class UserController {
 
   @Get(':id')
   findById(@Param('id', ParseIntPipe) id: number): Promise<User | null> {
-    return this.userService.findOne({ id });
+    return this.userService.findById(id);
   }
 
   @Get()

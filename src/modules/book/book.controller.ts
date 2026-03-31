@@ -29,7 +29,7 @@ export class BookController {
 
   @Get(':id')
   findById(@Param('id', ParseIntPipe) id: number): Promise<Book | null> {
-    return this.bookService.findOne({ id });
+    return this.bookService.findById(id);
   }
 
   @Get()
