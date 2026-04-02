@@ -1,11 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Cart } from '@/modules/cart/entities/cart.entity';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { AddToCartDto } from '@/modules/cart/dto/add-to-cart.dto';
 import { CartItem } from '@/modules/cart/entities/cart-item.entity';
 import { CartErrors } from '@/modules/cart/enums/errors.enum';
-import { addToCart } from '@/modules/cart/services/add-to-cart';
+import { Book } from '@/modules/book/entities/book.entity';
+import { BookErrors } from '@/modules/book/enums/errors.enum';
 
 @Injectable()
 export class CartService {
@@ -39,7 +44,64 @@ export class CartService {
     userId: number,
     payload: AddToCartDto,
   ): Promise<CartItem> {
-    return await addToCart(this.dataSource, userId, payload);
+    const { bookId, quantity } = payload;
+
+    if (quantity <= 0)
+      throw new BadRequestException(CartErrors.QUANTITY_NOT_ENOUGH);
+
+    return await this.dataSource.transaction(async (manager) => {
+      const bookRepository = manager.getRepository(Book);
+      const cartRepository = manager.getRepository(Cart);
+      const cartItemRepository = manager.getRepository(CartItem);
+
+      const book = await bookRepository.findOne({
+        where: { id: bookId },
+      });
+
+      if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
+
+      let cart = await cartRepository.findOne({
+        where: { user: { id: userId } },
+      });
+
+      if (!cart) {
+        cart = cartRepository.create({
+          user: { id: userId },
+          items: [],
+        });
+
+        cart = await cartRepository.save(cart);
+      }
+
+      const existingItem = await cartItemRepository.findOne({
+        where: {
+          cart: { id: cart.id },
+          book: { id: bookId },
+        },
+      });
+
+      if (existingItem) {
+        const nextQuantity = existingItem.quantity + quantity;
+
+        if (nextQuantity > book.stockCount)
+          throw new BadRequestException(CartErrors.QUANTITY_NOT_AVAILABLE);
+
+        existingItem.quantity = nextQuantity;
+
+        return cartItemRepository.save(existingItem);
+      }
+
+      if (quantity > book.stockCount)
+        throw new BadRequestException(CartErrors.QUANTITY_NOT_AVAILABLE);
+
+      const item = cartItemRepository.create({
+        cart,
+        book,
+        quantity,
+      });
+
+      return cartItemRepository.save(item);
+    });
   }
 
   async deleteItemFromCart(userId: number, bookId: number): Promise<void> {
