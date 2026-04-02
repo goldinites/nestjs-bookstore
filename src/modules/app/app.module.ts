@@ -19,7 +19,7 @@ import { ConfigModule } from '@nestjs/config';
       username: process.env.DB_USERNAME,
       autoLoadEntities: true,
       database: process.env.DB_NAME,
-      synchronize: true,
+      synchronize: process.env.NODE_ENV === 'development',
       logging: process.env.NODE_ENV === 'development',
     }),
     AuthModule,

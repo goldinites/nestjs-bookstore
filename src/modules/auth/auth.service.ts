@@ -40,7 +40,7 @@ export class AuthService {
   async signIn(payload: SignInDto): Promise<SignInResponse> {
     const user: User | null = await this.userService.findByEmail(payload.email);
 
-    if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
+    if (!user) throw new UnauthorizedException(AuthErrors.WRONG_CREDENTIALS);
 
     const isMatch: boolean = await argon2.verify(
       user.password,

@@ -5,7 +5,7 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { AddToCartDto } from '@/modules/cart/dto/add-to-cart.dto';
 import { CartItem } from '@/modules/cart/entities/cart-item.entity';
 import { CartErrors } from '@/modules/cart/enums/errors.enum';
-import { addToCart } from '@/modules/cart/services/add-to-cart.service';
+import { addToCart } from '@/modules/cart/services/add-to-cart';
 
 @Injectable()
 export class CartService {
