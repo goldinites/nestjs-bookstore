@@ -79,9 +79,7 @@ export class UserService {
 
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 
-    const { affected } = await this.userRepository.delete(id);
-
-    if (affected === 0) throw new BadRequestException(UserErrors.NOT_DELETED);
+    await this.userRepository.remove(user);
 
     return { success: true };
   }

@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
 import { BookModule } from '@/modules/book/book.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Book } from '@/modules/book/entities/book.entity';
-import { User } from '@/modules/user/entities/user.entity';
 import { AuthModule } from '@/modules/auth/auth.module';
 import { UserModule } from '@/modules/user/user.module';
+import { CartModule } from '@/modules/cart/cart.module';
 import { ConfigModule } from '@nestjs/config';
 
 @Module({
@@ -18,7 +17,7 @@ import { ConfigModule } from '@nestjs/config';
       port: Number(process.env.DB_PORT),
       password: process.env.DB_PASSWORD,
       username: process.env.DB_USERNAME,
-      entities: [Book, User],
+      autoLoadEntities: true,
       database: process.env.DB_NAME,
       synchronize: true,
       logging: process.env.NODE_ENV === 'development',
@@ -26,6 +25,7 @@ import { ConfigModule } from '@nestjs/config';
     AuthModule,
     UserModule,
     BookModule,
+    CartModule,
   ],
 })
 export class AppModule {}
