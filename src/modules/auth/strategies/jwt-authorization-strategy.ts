@@ -9,7 +9,8 @@ import { TokenPayload } from '@/modules/auth/types/token-payload.type';
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private readonly configService: ConfigService) {
-    const secret: string | undefined = configService.get<string>('JWT_SECRET');
+    const secret: string | undefined =
+      configService.get<string>('JWT_ACCESS_SECRET');
 
     if (!secret) throw new Error(AuthErrors.SECRET_KEY_NOT_DEFINED);
 

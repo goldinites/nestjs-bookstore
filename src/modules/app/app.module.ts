@@ -5,11 +5,20 @@ import { AuthModule } from '@/modules/auth/auth.module';
 import { UserModule } from '@/modules/user/user.module';
 import { CartModule } from '@/modules/cart/cart.module';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+    }),
+    ThrottlerModule.forRoot({
+      throttlers: [
+        {
+          ttl: Number(process.env.RATE_LIMIT_TTL),
+          limit: Number(process.env.RATE_LIMIT_MAX),
+        },
+      ],
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
