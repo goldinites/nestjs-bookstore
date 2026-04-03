@@ -21,6 +21,8 @@ import { RefreshTokenPayload } from '@/modules/auth/types/refresh-token-payload.
 import { RedisTokenService } from '@/modules/auth/services/redis-token.service';
 import { RefreshTokenDto } from '@/modules/auth/dto/refresh-token.dto';
 import { parseTtlToSeconds } from '@/modules/utils/parse-ttl-to-seconds';
+import { ConfigService } from '@nestjs/config';
+import { DEFAULT_REFRESH_TOKEN_TTL } from '@/modules/app/constants/app.constants';
 
 @Injectable()
 export class AuthService {
@@ -28,6 +30,7 @@ export class AuthService {
     private jwtService: JwtService,
     private userService: UserService,
     private redisTokenService: RedisTokenService,
+    private readonly configService: ConfigService,
   ) {}
 
   async register(payload: RegisterDto): Promise<UserResponse> {
@@ -55,14 +58,17 @@ export class AuthService {
     };
 
     const ttlSeconds: number = parseTtlToSeconds(
-      process.env.JWT_REFRESH_EXPIRES_IN,
+      this.configService.get<string>(
+        'JWT_REFRESH_EXPIRES_IN',
+        DEFAULT_REFRESH_TOKEN_TTL,
+      ),
     );
 
     const accessToken: string = await this.jwtService.signAsync(accessPayload);
     const refreshToken: string = await this.jwtService.signAsync(
       refreshPayload,
       {
-        secret: process.env.JWT_REFRESH_SECRET,
+        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
         expiresIn: ttlSeconds,
       },
     );
@@ -98,7 +104,7 @@ export class AuthService {
       decoded = await this.jwtService.verifyAsync<RefreshTokenPayload>(
         payload.refreshToken,
         {
-          secret: process.env.JWT_REFRESH_SECRET,
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
         },
       );
     } catch {
@@ -128,7 +134,7 @@ export class AuthService {
       const decoded = await this.jwtService.verifyAsync<RefreshTokenPayload>(
         payload.refreshToken,
         {
-          secret: process.env.JWT_REFRESH_SECRET,
+          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
         },
       );
 
