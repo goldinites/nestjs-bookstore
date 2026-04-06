@@ -1,6 +1,6 @@
 type TtlUnit = 's' | 'm' | 'h' | 'd';
 
-export function parseTtlToSeconds(value: string | undefined): number {
+export function parseTtlToSeconds(value?: string): number {
   const defaultTtl: number = 7 * 24 * 60 * 60;
 
   if (!value) return defaultTtl;
