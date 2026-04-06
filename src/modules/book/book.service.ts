@@ -15,7 +15,11 @@ import { normalizeQueryWhere } from '@/modules/utils/normalize-query-where';
 
 @Injectable()
 export class BookService {
-  multiValueFields: string[] = ['publishedYear', 'genre', 'language'] as const;
+  private multiValueFields: string[] = [
+    'publishedYear',
+    'genre',
+    'language',
+  ] as const;
 
   constructor(
     @InjectRepository(Book)
