@@ -4,10 +4,11 @@ import { Type } from 'class-transformer';
 export class AddToCartDto {
   @IsInt()
   @Type(() => Number)
+  @Min(1)
   bookId: number;
 
   @IsInt()
-  @Min(1)
   @Type(() => Number)
+  @Min(1)
   quantity: number;
 }

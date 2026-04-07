@@ -62,7 +62,7 @@ export class AuthService {
 
     const ttlSeconds: number = parseTtlToSeconds(
       this.configService.get<string>(
-        'JWT_REFRESH_EXPIRES_IN',
+        'jwt.refresh.expiresIn',
         DEFAULT_REFRESH_TOKEN_TTL,
       ),
     );
@@ -71,7 +71,7 @@ export class AuthService {
     const refreshToken: string = await this.jwtService.signAsync(
       refreshPayload,
       {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+        secret: this.configService.get<string>('jwt.refresh.secret'),
         expiresIn: ttlSeconds,
       },
     );
@@ -107,7 +107,7 @@ export class AuthService {
       decoded = await this.jwtService.verifyAsync<RefreshTokenPayload>(
         payload.refreshToken,
         {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+          secret: this.configService.get<string>('jwt.refresh.secret'),
         },
       );
     } catch {
@@ -137,7 +137,7 @@ export class AuthService {
       const decoded = await this.jwtService.verifyAsync<RefreshTokenPayload>(
         payload.refreshToken,
         {
-          secret: this.configService.get<string>('JWT_REFRESH_SECRET'),
+          secret: this.configService.get<string>('jwt.refresh.secret'),
         },
       );
 

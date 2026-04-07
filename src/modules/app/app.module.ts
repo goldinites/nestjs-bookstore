@@ -16,6 +16,7 @@ import { OrderModule } from '@/modules/order/order.module';
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
+      cache: true,
       load: [databaseConfig, jwtConfig, throttlerConfig],
       validate: (config) =>
         configSchema.validateSync(config, {

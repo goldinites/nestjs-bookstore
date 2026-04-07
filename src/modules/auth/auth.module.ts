@@ -12,8 +12,10 @@ import { RedisTokenService } from '@/modules/auth/services/redis-token.service';
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_ACCESS_SECRET'),
-        signOptions: { expiresIn: configService.get('JWT_ACCESS_EXPIRES_IN') },
+        secret: configService.get<string>('jwt.access.secret'),
+        signOptions: {
+          expiresIn: configService.get('jwt.access.expiresIn'),
+        },
       }),
     }),
     UserModule,

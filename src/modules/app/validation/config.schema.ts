@@ -43,6 +43,7 @@ export const configSchema = object({
     .optional()
     .typeError('JWT_ACCESS_EXPIRES_IN must be a string')
     .default(DEFAULT_ACCESS_TOKEN_TTL),
+
   JWT_REFRESH_SECRET: string()
     .required('JWT_REFRESH_SECRET is required')
     .typeError('JWT_REFRESH_SECRET must be a string'),
@@ -50,4 +51,4 @@ export const configSchema = object({
     .optional()
     .typeError('JWT_REFRESH_EXPIRES_IN must be a string')
     .default(DEFAULT_REFRESH_TOKEN_TTL),
-});
+}).noUnknown(true, 'Unknown environment variables are not allowed');
