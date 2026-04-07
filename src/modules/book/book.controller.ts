@@ -34,39 +34,41 @@ import { BookErrors } from '@/modules/book/enums/errors.enum';
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 
-  @Get(':id')
-  async findById(@Param('id', ParseIntPipe) id: number): Promise<BookResponse> {
-    const book: Book | null = await this.bookService.findById(id);
-
-    if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
-
-    return mapBookToResponse(book);
-  }
-
   @Get()
-  async find(@Query() query: GetBookReqDto): Promise<BookResponse[]> {
-    const books: Book[] = await this.bookService.find(query);
+  async getBooks(@Query() query: GetBookReqDto): Promise<BookResponse[]> {
+    const books: Book[] = await this.bookService.getBooks(query);
 
     if (books.length === 0) return [];
 
     return mapBooksToResponse(books);
   }
 
+  @Get(':id')
+  async getBookById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<BookResponse> {
+    const book: Book | null = await this.bookService.getBookById(id);
+
+    if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
+
+    return mapBookToResponse(book);
+  }
+
   @Post()
   @Permissions(Roles.ADMIN)
-  async create(@Body() payload: CreateBookDto): Promise<BookResponse> {
-    const book: Book = await this.bookService.create(payload);
+  async createBook(@Body() payload: CreateBookDto): Promise<BookResponse> {
+    const book: Book = await this.bookService.createBook(payload);
 
     return mapBookToResponse(book);
   }
 
   @Post('import')
   @Permissions(Roles.ADMIN)
-  async import(
+  async importBooks(
     @Body(new ParseArrayPipe({ items: CreateBookDto }))
     payload: CreateBookDto[],
   ): Promise<BookResponse[]> {
-    const books: Book[] = await this.bookService.import(payload);
+    const books: Book[] = await this.bookService.importBooks(payload);
 
     if (books.length === 0) return [];
 
@@ -75,11 +77,11 @@ export class BookController {
 
   @Patch(':id')
   @Permissions(Roles.ADMIN)
-  async update(
+  async updateBook(
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: UpdateBookDto,
   ): Promise<BookResponse> {
-    const book: Book | null = await this.bookService.update(id, payload);
+    const book: Book | null = await this.bookService.updateBook(id, payload);
 
     if (!book) throw new BadRequestException(BookErrors.NOT_UPDATED);
 
@@ -88,7 +90,7 @@ export class BookController {
 
   @Delete(':id')
   @Permissions(Roles.ADMIN)
-  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return await this.bookService.delete(id);
+  async deleteBook(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return await this.bookService.deleteBook(id);
   }
 }

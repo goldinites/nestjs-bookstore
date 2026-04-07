@@ -23,7 +23,7 @@ export class BookService {
     private bookRepository: Repository<Book>,
   ) {}
 
-  async find(query?: GetBookReqDto): Promise<Book[]> {
+  async getBooks(query?: GetBookReqDto): Promise<Book[]> {
     const { field, direction, limit, offset, ...rest } = {
       ...getBookDefaultParams,
       ...query,
@@ -42,17 +42,17 @@ export class BookService {
     });
   }
 
-  async findById(id: number): Promise<Book | null> {
+  async getBookById(id: number): Promise<Book | null> {
     return await this.bookRepository.findOneBy({ id });
   }
 
-  async create(payload: CreateBookDto): Promise<Book> {
+  async createBook(payload: CreateBookDto): Promise<Book> {
     const book: Book | null = this.bookRepository.create(payload);
 
     return await this.bookRepository.save(book);
   }
 
-  async import(payload: CreateBookDto[]): Promise<Book[]> {
+  async importBooks(payload: CreateBookDto[]): Promise<Book[]> {
     const books: Book[] = this.bookRepository.create(payload);
 
     if (books.length === 0) return [];
@@ -60,8 +60,8 @@ export class BookService {
     return await this.bookRepository.save(books);
   }
 
-  async update(id: number, payload: UpdateBookDto): Promise<Book | null> {
-    const book: Book | null = await this.findById(id);
+  async updateBook(id: number, payload: UpdateBookDto): Promise<Book | null> {
+    const book: Book | null = await this.getBookById(id);
 
     if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
 
@@ -69,15 +69,15 @@ export class BookService {
 
     if (affected === 0) throw new BadRequestException(BookErrors.NOT_UPDATED);
 
-    const updated: Book | null = await this.findById(id);
+    const updated: Book | null = await this.getBookById(id);
 
     if (!updated) throw new NotFoundException(BookErrors.NOT_FOUND);
 
     return updated;
   }
 
-  async delete(id: number): Promise<void> {
-    const book: Book | null = await this.findById(id);
+  async deleteBook(id: number): Promise<void> {
+    const book: Book | null = await this.getBookById(id);
 
     if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
 

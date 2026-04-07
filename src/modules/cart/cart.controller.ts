@@ -65,7 +65,7 @@ export class CartController {
     @Param('bookId', ParseIntPipe) bookId: number,
     @Body('quantity', ParseIntPipe) quantity: number,
   ): Promise<CartItemResponse | void> {
-    const item: CartItem | void = await this.cartService.updateQuantity(
+    const item: CartItem | void = await this.cartService.updateItemQuantity(
       userId,
       bookId,
       quantity,

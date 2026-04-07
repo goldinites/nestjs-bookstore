@@ -106,7 +106,7 @@ export class CartService {
     );
   }
 
-  async updateQuantity(
+  async updateItemQuantity(
     userId: number,
     bookId: number,
     quantity: number,

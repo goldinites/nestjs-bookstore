@@ -14,6 +14,8 @@ import { BookErrors } from '@/modules/book/enums/errors.enum';
 import { OrderItem } from '@/modules/order/entities/order-item.entity';
 import { OrderErrors } from '@/modules/order/enums/errors.enum';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { GetOrderReqDto } from '@/modules/order/dto/get-order.dto';
+import { getOrderDefaultParams } from '@/modules/order/constants/get-order.constants';
 
 @Injectable()
 export class OrderService {
@@ -25,9 +27,19 @@ export class OrderService {
     private dataSource: DataSource,
   ) {}
 
-  async getOrders(userId: number): Promise<Order[]> {
+  async getOrders(userId: number, query: GetOrderReqDto): Promise<Order[]> {
+    const { field, direction, limit, offset, ...rest } = {
+      ...getOrderDefaultParams,
+      ...query,
+    };
+
     return await this.orderRepository.find({
-      where: { user: { id: userId } },
+      where: { user: { id: userId }, ...rest },
+      order: {
+        [field]: direction,
+      },
+      take: limit,
+      skip: offset,
       relations: { items: true },
     });
   }

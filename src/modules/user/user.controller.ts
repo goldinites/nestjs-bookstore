@@ -34,37 +34,37 @@ import { UserErrors } from '@/modules/user/enums/errors.enum';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @Get()
+  async getUsers(@Query() query: GetUserReqDto): Promise<UserResponse[]> {
+    const users: User[] = await this.userService.getUsers(query);
+
+    return mapUsersToResponse(users);
+  }
+
   @Get(':id')
-  async findById(
+  async getUserById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UserResponse | null> {
-    const user: User | null = await this.userService.findById(id);
+    const user: User | null = await this.userService.getUserById(id);
 
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 
     return mapUserToResponse(user);
   }
 
-  @Get()
-  async find(@Query() query: GetUserReqDto): Promise<UserResponse[]> {
-    const users: User[] = await this.userService.find(query);
-
-    return mapUsersToResponse(users);
-  }
-
   @Post()
-  async create(@Body() payload: CreateUserDto): Promise<UserResponse> {
-    const user: User = await this.userService.create(payload);
+  async createUser(@Body() payload: CreateUserDto): Promise<UserResponse> {
+    const user: User = await this.userService.createUser(payload);
 
     return mapUserToResponse(user);
   }
 
   @Patch(':id')
-  async update(
+  async updateUser(
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: UpdateUserDto,
   ): Promise<UserResponse | null> {
-    const user: User | null = await this.userService.update(
+    const user: User | null = await this.userService.updateUser(
       id,
       payload,
       Roles.ADMIN,
@@ -76,7 +76,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  async delete(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return await this.userService.delete(id);
+  async deleteUser(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return await this.userService.deleteUser(id);
   }
 }

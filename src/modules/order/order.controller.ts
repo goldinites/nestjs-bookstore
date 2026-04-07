@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
@@ -19,6 +20,7 @@ import {
   mapOrdersToResponse,
   mapOrderToResponse,
 } from '@/modules/order/mappers/order-to-response.mapper';
+import { GetOrderReqDto } from '@/modules/order/dto/get-order.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('order')
@@ -28,8 +30,9 @@ export class OrderController {
   @Get()
   async getOrders(
     @CurrentUser() { userId }: AuthUser,
+    @Query() query: GetOrderReqDto,
   ): Promise<OrderResponse[]> {
-    const orders: Order[] = await this.orderService.getOrders(userId);
+    const orders: Order[] = await this.orderService.getOrders(userId, query);
 
     if (orders.length === 0) return [];
 

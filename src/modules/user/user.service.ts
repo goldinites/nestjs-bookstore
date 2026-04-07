@@ -21,7 +21,7 @@ export class UserService {
     private userRepository: Repository<User>,
   ) {}
 
-  async find(query?: GetUserReqDto): Promise<User[]> {
+  async getUsers(query?: GetUserReqDto): Promise<User[]> {
     const { field, direction, limit, offset, ...where } = {
       ...getUserDefaultParams,
       ...query,
@@ -35,15 +35,15 @@ export class UserService {
     });
   }
 
-  async findById(id: number): Promise<User | null> {
+  async getUserById(id: number): Promise<User | null> {
     return await this.userRepository.findOneBy({ id });
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async getUserByEmail(email: string): Promise<User | null> {
     return await this.userRepository.findOneBy({ email });
   }
 
-  async create(payload: CreateUserDto): Promise<User> {
+  async createUser(payload: CreateUserDto): Promise<User> {
     const hashedPassword: string = await argon2.hash(payload.password);
 
     const user: User = this.userRepository.create({
@@ -54,12 +54,12 @@ export class UserService {
     return await this.userRepository.save(user);
   }
 
-  async update(
+  async updateUser(
     id: number,
     payload: UpdateUserDto,
     role: Roles,
   ): Promise<User | null> {
-    const user: User | null = await this.findById(id);
+    const user: User | null = await this.getUserById(id);
 
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 
@@ -73,15 +73,15 @@ export class UserService {
 
     if (affected === 0) throw new BadRequestException(UserErrors.NOT_UPDATED);
 
-    const updated: User | null = await this.findById(id);
+    const updated: User | null = await this.getUserById(id);
 
     if (!updated) throw new NotFoundException(UserErrors.NOT_FOUND);
 
     return updated;
   }
 
-  async delete(id: number): Promise<void> {
-    const user: User | null = await this.findById(id);
+  async deleteUser(id: number): Promise<void> {
+    const user: User | null = await this.getUserById(id);
 
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 

@@ -37,14 +37,14 @@ export class AuthService {
   ) {}
 
   async register(payload: RegisterDto): Promise<UserResponse> {
-    const existingUser: User | null = await this.userService.findByEmail(
+    const existingUser: User | null = await this.userService.getUserByEmail(
       payload.email,
     );
 
     if (existingUser)
       throw new ConflictException(AuthErrors.USER_ALREADY_EXISTS);
 
-    const newUser: User = await this.userService.create(payload);
+    const newUser: User = await this.userService.createUser(payload);
 
     return mapUserToResponse(newUser);
   }
@@ -86,7 +86,9 @@ export class AuthService {
   }
 
   async signIn(payload: SignInDto): Promise<SignInResponse> {
-    const user: User | null = await this.userService.findByEmail(payload.email);
+    const user: User | null = await this.userService.getUserByEmail(
+      payload.email,
+    );
 
     if (!user) throw new UnauthorizedException(AuthErrors.WRONG_CREDENTIALS);
 
@@ -123,7 +125,7 @@ export class AuthService {
       throw new UnauthorizedException(AuthErrors.WRONG_CREDENTIALS);
     }
 
-    const user: User | null = await this.userService.findById(userId);
+    const user: User | null = await this.userService.getUserById(userId);
 
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 
@@ -148,7 +150,7 @@ export class AuthService {
   }
 
   async getMe(id: number): Promise<UserResponse> {
-    const user: User | null = await this.userService.findById(id);
+    const user: User | null = await this.userService.getUserById(id);
 
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 
@@ -160,7 +162,11 @@ export class AuthService {
     role: Roles,
     payload: UpdateUserDto,
   ): Promise<UserResponse> {
-    const user: User | null = await this.userService.update(id, payload, role);
+    const user: User | null = await this.userService.updateUser(
+      id,
+      payload,
+      role,
+    );
 
     if (!user) throw new BadRequestException(UserErrors.NOT_UPDATED);
 
@@ -168,6 +174,6 @@ export class AuthService {
   }
 
   async deleteMe(id: number): Promise<void> {
-    await this.userService.delete(id);
+    await this.userService.deleteUser(id);
   }
 }
