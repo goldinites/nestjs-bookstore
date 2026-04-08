@@ -10,5 +10,4 @@ export type UploadFileResponse = {
   url: string;
   mimetype: string;
   size: number;
-  folder: string;
 };

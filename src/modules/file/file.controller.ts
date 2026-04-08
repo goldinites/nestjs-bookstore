@@ -31,7 +31,7 @@ export class FileController {
   ): UploadFileResponse {
     if (!file) throw new BadRequestException(FileErrors.FILE_REQUIRED);
 
-    return mapFileToResponse(file);
+    return mapFileToResponse(file, FILE_FOLDERS.images);
   }
 
   @Post('file')
@@ -44,7 +44,7 @@ export class FileController {
   ): UploadFileResponse {
     if (!file) throw new BadRequestException(FileErrors.FILE_REQUIRED);
 
-    return mapFileToResponse(file);
+    return mapFileToResponse(file, FILE_FOLDERS.files);
   }
 
   @Delete(':folder/:filename')
