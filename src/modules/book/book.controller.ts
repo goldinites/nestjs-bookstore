@@ -104,19 +104,19 @@ export class BookController {
   async updateBookImage(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile(RequiredFilePipe())
-    file: Express.Multer.File,
+    image: Express.Multer.File,
   ): Promise<BookResponse> {
-    if (!file) throw new BadRequestException(BookErrors.IMAGE_REQUIRED);
+    if (!image) throw new BadRequestException(BookErrors.IMAGE_REQUIRED);
 
-    this.fileService.saveMetadata(FileFolders.IMAGES, file.filename, {
-      originalName: file.originalname,
-      mimetype: file.mimetype,
-      size: file.size,
+    this.fileService.saveMetadata(FileFolders.IMAGES, image.filename, {
+      originalName: image.originalname,
+      mimetype: image.mimetype,
+      size: image.size,
     });
 
     const imageUrl = this.fileService.buildPublicUrl(
       FileFolders.IMAGES,
-      file.filename,
+      image.filename,
     );
 
     const book: Book | null = await this.bookService.updateBook(id, {
