@@ -1,8 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
-import { join } from 'path';
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  unlinkSync,
+  writeFileSync,
+} from 'fs';
+import { extname, join } from 'path';
 import {
   BINARY_MIME_TYPES,
+  DOCUMENT_UPLOAD_MIME_TYPES,
+  IMAGE_UPLOAD_MIME_TYPES,
+  MAX_FILE_SIZE,
+  MAX_IMAGE_SIZE,
   TEXT_MIME_TYPES,
   UPLOADS_FOLDER,
   UPLOADS_PATH,
@@ -13,9 +23,66 @@ import {
   FileReadAs,
 } from '@/modules/file/types/file.types';
 import { FileFolders } from '@/modules/file/enums/folders.enum';
+import { UploadType } from '@/modules/file/enums/upload-type.enum';
+import type { MulterModuleOptions } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { randomUUID } from 'crypto';
+import { FileErrors } from '@/modules/file/enums/errors.enum';
 
 @Injectable()
 export class FileService {
+  ensureDirectory(directoryPath: string): void {
+    if (!existsSync(directoryPath)) {
+      mkdirSync(directoryPath, { recursive: true });
+    }
+  }
+
+  buildUploadPath(folder: FileFolders): string {
+    const destination = join(UPLOADS_PATH, folder);
+    this.ensureDirectory(destination);
+
+    return destination;
+  }
+
+  createUploadOptions(
+    folder: FileFolders,
+    type: UploadType,
+  ): MulterModuleOptions | undefined {
+    const destination = this.buildUploadPath(folder);
+
+    return {
+      storage: diskStorage({
+        destination,
+        filename: (_req, file, callback) => {
+          const fileExt = extname(file.originalname);
+          callback(null, `${randomUUID()}${fileExt}`);
+        },
+      }),
+      fileFilter: (_req, file, callback) => {
+        if (
+          type === UploadType.IMAGE &&
+          !IMAGE_UPLOAD_MIME_TYPES.test(file.mimetype)
+        ) {
+          callback(new Error(FileErrors.NOT_AVAILABLE_TYPE), false);
+          return;
+        }
+
+        if (
+          type === UploadType.FILE &&
+          !DOCUMENT_UPLOAD_MIME_TYPES.test(file.mimetype)
+        ) {
+          callback(new Error(FileErrors.NOT_AVAILABLE_TYPE), false);
+          return;
+        }
+
+        callback(null, true);
+      },
+      limits: {
+        fileSize: type === UploadType.IMAGE ? MAX_IMAGE_SIZE : MAX_FILE_SIZE,
+      },
+    };
+  }
+
   buildPublicUrl(folder: FileFolders, filename: string): string {
     return `/${UPLOADS_FOLDER}/${folder}/${filename}`;
   }

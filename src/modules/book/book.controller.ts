@@ -7,7 +7,6 @@ import {
   NotFoundException,
   Param,
   ParseArrayPipe,
-  ParseFilePipeBuilder,
   ParseIntPipe,
   Patch,
   Post,
@@ -33,9 +32,9 @@ import {
 import { BookErrors } from '@/modules/book/enums/errors.enum';
 import { FileService } from '@/modules/file/file.service';
 import { FileFolders } from '@/modules/file/enums/folders.enum';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { createUploadOptions } from '@/modules/file/helpers/file.helper';
 import { UploadType } from '@/modules/file/enums/upload-type.enum';
+import { FilesUploadInterceptor } from '@/modules/file/interceptors/file-upload.interceptor';
+import { RequiredFilePipe } from '@/modules/file/pipes/required-file.pipe';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('book')
@@ -101,15 +100,10 @@ export class BookController {
 
   @Patch(':id/image')
   @Permissions(Roles.ADMIN)
-  @UseInterceptors(
-    FileInterceptor(
-      'file',
-      createUploadOptions(FileFolders.IMAGES, UploadType.IMAGE),
-    ),
-  )
+  @UseInterceptors(FilesUploadInterceptor(FileFolders.IMAGES, UploadType.IMAGE))
   async updateBookImage(
     @Param('id', ParseIntPipe) id: number,
-    @UploadedFile(new ParseFilePipeBuilder().build({ fileIsRequired: true }))
+    @UploadedFile(RequiredFilePipe())
     file: Express.Multer.File,
   ): Promise<BookResponse> {
     if (!file) throw new BadRequestException(BookErrors.IMAGE_REQUIRED);

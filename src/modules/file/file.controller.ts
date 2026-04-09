@@ -5,40 +5,32 @@ import {
   Get,
   NotFoundException,
   Param,
-  ParseFilePipeBuilder,
   Post,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
 import { FileService } from './file.service';
 import { DeleteFileDto } from './dto/delete-file.dto';
 import type {
   StoredFileResponse,
   UploadFileResponse,
 } from './types/file.types';
-import { createUploadOptions } from './helpers/file.helper';
 import { FileFolders } from '@/modules/file/enums/folders.enum';
 import { mapFilesToResponse } from '@/modules/file/mappers/file-to-response.mapper';
 import { FileErrors } from '@/modules/file/enums/errors.enum';
 import { GetFileDto } from '@/modules/file/dto/get-file.dto';
-import { MAX_FILE_COUNT } from '@/modules/file/constants/file.constants';
 import { UploadType } from '@/modules/file/enums/upload-type.enum';
+import { FilesUploadInterceptor } from '@/modules/file/interceptors/file-upload.interceptor';
+import { RequiredFilePipe } from '@/modules/file/pipes/required-file.pipe';
 
 @Controller('files')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
   @Post('images')
-  @UseInterceptors(
-    FilesInterceptor(
-      'files',
-      MAX_FILE_COUNT,
-      createUploadOptions(FileFolders.IMAGES, UploadType.IMAGE),
-    ),
-  )
+  @UseInterceptors(FilesUploadInterceptor(FileFolders.IMAGES, UploadType.IMAGE))
   uploadImages(
-    @UploadedFiles(new ParseFilePipeBuilder().build({ fileIsRequired: true }))
+    @UploadedFiles(RequiredFilePipe())
     files: Express.Multer.File[],
   ): UploadFileResponse[] {
     if (!files?.length) throw new BadRequestException(FileErrors.FILE_REQUIRED);
@@ -55,15 +47,9 @@ export class FileController {
   }
 
   @Post('files')
-  @UseInterceptors(
-    FilesInterceptor(
-      'files',
-      MAX_FILE_COUNT,
-      createUploadOptions(FileFolders.FILES, UploadType.FILE),
-    ),
-  )
+  @UseInterceptors(FilesUploadInterceptor(FileFolders.FILES, UploadType.FILE))
   uploadFiles(
-    @UploadedFiles(new ParseFilePipeBuilder().build({ fileIsRequired: true }))
+    @UploadedFiles(RequiredFilePipe())
     files: Express.Multer.File[],
   ): UploadFileResponse[] {
     if (!files?.length) throw new BadRequestException(FileErrors.FILE_REQUIRED);
