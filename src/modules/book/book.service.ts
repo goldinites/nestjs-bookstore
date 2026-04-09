@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from '@/modules/book/entities/book.entity';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 import { GetBookReqDto } from '@/modules/book/dto/get-book.dto';
 import { getBookDefaultParams } from '@/modules/book/constants/get-book.constants';
 import { BookErrors } from '@/modules/book/enums/errors.enum';
@@ -23,7 +23,10 @@ export class BookService {
     private bookRepository: Repository<Book>,
   ) {}
 
-  async getBooks(query?: GetBookReqDto): Promise<Book[]> {
+  async getBooks(
+    query?: GetBookReqDto,
+    select?: FindOptionsSelect<Book>,
+  ): Promise<Book[]> {
     const { field, direction, limit, offset, ...rest } = {
       ...getBookDefaultParams,
       ...query,
@@ -39,6 +42,7 @@ export class BookService {
       order: { [field]: direction },
       take: limit,
       skip: offset,
+      select,
     });
   }
 
