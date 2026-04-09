@@ -6,6 +6,7 @@ export function mapBookToResponse(book: Book): BookResponse {
     id: book.id,
     title: book.title,
     author: book.author,
+    imageUrl: book.imageUrl,
     publishedYear: book.publishedYear,
     genre: book.genre,
     language: book.language,

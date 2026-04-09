@@ -7,6 +7,7 @@ export function mapCartItemToResponse(item: CartItem): CartItemResponse {
   return {
     id: item.id,
     bookId: item.book.id,
+    imageUrl: item.book.imageUrl,
     title: item.book.title,
     price: Number(item.book.price),
     quantity: item.quantity,

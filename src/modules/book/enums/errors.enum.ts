@@ -3,4 +3,5 @@ export enum BookErrors {
   NOT_CREATED = 'Book not created',
   NOT_UPDATED = 'Book not updated',
   NOT_DELETED = 'Book not deleted',
+  IMAGE_REQUIRED = 'Image is required',
 }

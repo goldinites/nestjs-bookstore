@@ -16,6 +16,10 @@ export class UpdateBookDto {
 
   @IsOptional()
   @IsString()
+  imageUrl?: string;
+
+  @IsOptional()
+  @IsString()
   author?: string;
 
   @IsOptional()

@@ -23,6 +23,7 @@ import { mapFilesToResponse } from '@/modules/file/mappers/file-to-response.mapp
 import { FileErrors } from '@/modules/file/enums/errors.enum';
 import { GetFileDto } from '@/modules/file/dto/get-file.dto';
 import { MAX_FILE_COUNT } from '@/modules/file/constants/file.constants';
+import { UploadType } from '@/modules/file/enums/upload-type.enum';
 
 @Controller('files')
 export class FileController {
@@ -33,7 +34,7 @@ export class FileController {
     FilesInterceptor(
       'files',
       MAX_FILE_COUNT,
-      createUploadOptions(FileFolders.IMAGES, 'image'),
+      createUploadOptions(FileFolders.IMAGES, UploadType.IMAGE),
     ),
   )
   uploadImages(
@@ -58,7 +59,7 @@ export class FileController {
     FilesInterceptor(
       'files',
       MAX_FILE_COUNT,
-      createUploadOptions(FileFolders.FILES, 'file'),
+      createUploadOptions(FileFolders.FILES, UploadType.FILE),
     ),
   )
   uploadFiles(

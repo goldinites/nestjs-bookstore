@@ -7,11 +7,14 @@ import {
   NotFoundException,
   Param,
   ParseArrayPipe,
+  ParseFilePipeBuilder,
   ParseIntPipe,
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { BookService } from '@/modules/book/book.service';
 import { GetBookReqDto } from '@/modules/book/dto/get-book.dto';
@@ -28,11 +31,19 @@ import {
   mapBookToResponse,
 } from '@/modules/book/mappers/book-to-response.mapper';
 import { BookErrors } from '@/modules/book/enums/errors.enum';
+import { FileService } from '@/modules/file/file.service';
+import { FileFolders } from '@/modules/file/enums/folders.enum';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { createUploadOptions } from '@/modules/file/helpers/file.helper';
+import { UploadType } from '@/modules/file/enums/upload-type.enum';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('book')
 export class BookController {
-  constructor(private readonly bookService: BookService) {}
+  constructor(
+    private readonly bookService: BookService,
+    private readonly fileService: FileService,
+  ) {}
 
   @Get()
   async getBooks(@Query() query: GetBookReqDto): Promise<BookResponse[]> {
@@ -82,6 +93,42 @@ export class BookController {
     @Body() payload: UpdateBookDto,
   ): Promise<BookResponse> {
     const book: Book | null = await this.bookService.updateBook(id, payload);
+
+    if (!book) throw new BadRequestException(BookErrors.NOT_UPDATED);
+
+    return mapBookToResponse(book);
+  }
+
+  @Patch(':id/image')
+  @Permissions(Roles.ADMIN)
+  @UseInterceptors(
+    FileInterceptor(
+      'file',
+      createUploadOptions(FileFolders.IMAGES, UploadType.IMAGE),
+    ),
+  )
+  async updateBookImage(
+    @Param('id', ParseIntPipe) id: number,
+    @UploadedFile(new ParseFilePipeBuilder().build({ fileIsRequired: true }))
+    file: Express.Multer.File,
+  ): Promise<BookResponse> {
+    if (!file) throw new BadRequestException(BookErrors.IMAGE_REQUIRED);
+
+    this.fileService.saveMetadata(FileFolders.IMAGES, file.filename, {
+      originalName: file.originalname,
+      mimetype: file.mimetype,
+      size: file.size,
+    });
+
+    const imageUrl = this.fileService.buildPublicUrl(
+      FileFolders.IMAGES,
+      file.filename,
+    );
+
+    const book: Book | null = await this.bookService.updateBookImage(
+      id,
+      imageUrl,
+    );
 
     if (!book) throw new BadRequestException(BookErrors.NOT_UPDATED);
 

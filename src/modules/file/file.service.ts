@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
-import { buildUploadPath, createUploadOptions } from './helpers/file.helper';
 import {
   BINARY_MIME_TYPES,
   TEXT_MIME_TYPES,
@@ -12,20 +11,11 @@ import {
   FileMetadata,
   FilePath,
   FileReadAs,
-  UploadType,
 } from '@/modules/file/types/file.types';
 import { FileFolders } from '@/modules/file/enums/folders.enum';
 
 @Injectable()
 export class FileService {
-  createUploadOptions(folder: FileFolders, type: UploadType = 'file') {
-    return createUploadOptions(folder, type);
-  }
-
-  ensureFolder(folder: FileFolders): string {
-    return buildUploadPath(folder);
-  }
-
   buildPublicUrl(folder: FileFolders, filename: string): string {
     return `/${UPLOADS_FOLDER}/${folder}/${filename}`;
   }

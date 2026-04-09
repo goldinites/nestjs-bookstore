@@ -1,7 +1,5 @@
 import { FileFolders } from '@/modules/file/enums/folders.enum';
 
-export type UploadType = 'image' | 'file';
-
 export type FileReadAs = 'text' | 'base64' | 'unknown';
 
 export type FilePath = {

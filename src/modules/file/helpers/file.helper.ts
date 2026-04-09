@@ -1,16 +1,16 @@
 import { existsSync, mkdirSync } from 'fs';
-import { join, extname } from 'path';
+import { extname, join } from 'path';
 import { randomUUID } from 'crypto';
 import { diskStorage } from 'multer';
 import type { MulterModuleOptions } from '@nestjs/platform-express';
 import {
-  IMAGE_UPLOAD_MIME_TYPES,
   DOCUMENT_UPLOAD_MIME_TYPES,
+  IMAGE_UPLOAD_MIME_TYPES,
   MAX_FILE_SIZE,
   MAX_IMAGE_SIZE,
   UPLOADS_PATH,
 } from '@/modules/file/constants/file.constants';
-import { UploadType } from '@/modules/file/types/file.types';
+import { UploadType } from '@/modules/file/enums/upload-type.enum';
 import { FileErrors } from '@/modules/file/enums/errors.enum';
 import { FileFolders } from '@/modules/file/enums/folders.enum';
 
@@ -29,7 +29,7 @@ export const buildUploadPath = (folder: FileFolders): string => {
 
 export const createUploadOptions = (
   folder: FileFolders,
-  type: UploadType = 'file',
+  type: UploadType,
 ): MulterModuleOptions => {
   const destination = buildUploadPath(folder);
 
@@ -42,12 +42,18 @@ export const createUploadOptions = (
       },
     }),
     fileFilter: (_req, file, callback) => {
-      if (type === 'image' && !IMAGE_UPLOAD_MIME_TYPES.test(file.mimetype)) {
+      if (
+        type === UploadType.IMAGE &&
+        !IMAGE_UPLOAD_MIME_TYPES.test(file.mimetype)
+      ) {
         callback(new Error(FileErrors.NOT_AVAILABLE_TYPE), false);
         return;
       }
 
-      if (type === 'file' && !DOCUMENT_UPLOAD_MIME_TYPES.test(file.mimetype)) {
+      if (
+        type === UploadType.FILE &&
+        !DOCUMENT_UPLOAD_MIME_TYPES.test(file.mimetype)
+      ) {
         callback(new Error(FileErrors.NOT_AVAILABLE_TYPE), false);
         return;
       }
@@ -55,7 +61,7 @@ export const createUploadOptions = (
       callback(null, true);
     },
     limits: {
-      fileSize: type === 'image' ? MAX_IMAGE_SIZE : MAX_FILE_SIZE,
+      fileSize: type === UploadType.IMAGE ? MAX_IMAGE_SIZE : MAX_FILE_SIZE,
     },
   };
 };
