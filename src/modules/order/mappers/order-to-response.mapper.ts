@@ -7,6 +7,7 @@ function mapOrderItemToResponse(orderItem: OrderItem): OrderItemResponse {
   return {
     id: orderItem.id,
     title: orderItem.title,
+    imageUrl: orderItem.book.imageUrl,
     price: Number(orderItem.price),
     quantity: orderItem.quantity,
     author: orderItem.book.author,
