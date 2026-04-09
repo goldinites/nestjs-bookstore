@@ -2,56 +2,102 @@ import {
   BadRequestException,
   Controller,
   Delete,
+  Get,
+  NotFoundException,
   Param,
   ParseFilePipeBuilder,
   Post,
-  UploadedFile,
+  UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { FileService } from './file.service';
-import { DeleteFileParamsDto } from './dto/delete-file-params.dto';
-import type { UploadFileResponse } from './types/file.types';
+import { DeleteFileDto } from './dto/delete-file.dto';
+import type {
+  StoredFileResponse,
+  UploadFileResponse,
+} from './types/file.types';
 import { createUploadOptions } from './helpers/file.helper';
-import { FILE_FOLDERS } from '@/modules/file/constants/file.constants';
-import { mapFileToResponse } from '@/modules/file/mappers/file-to-response.mapper';
+import { FileFolders } from '@/modules/file/enums/folders.enum';
+import { mapFilesToResponse } from '@/modules/file/mappers/file-to-response.mapper';
 import { FileErrors } from '@/modules/file/enums/errors.enum';
+import { GetFileDto } from '@/modules/file/dto/get-file.dto';
+import { MAX_FILE_COUNT } from '@/modules/file/constants/file.constants';
 
 @Controller('files')
 export class FileController {
   constructor(private readonly fileService: FileService) {}
 
-  @Post('image')
+  @Post('images')
   @UseInterceptors(
-    FileInterceptor('file', createUploadOptions(FILE_FOLDERS.images, 'image')),
+    FilesInterceptor(
+      'files',
+      MAX_FILE_COUNT,
+      createUploadOptions(FileFolders.IMAGES, 'image'),
+    ),
   )
-  uploadImage(
-    @UploadedFile(new ParseFilePipeBuilder().build({ fileIsRequired: true }))
-    file: Express.Multer.File,
-  ): UploadFileResponse {
-    if (!file) throw new BadRequestException(FileErrors.FILE_REQUIRED);
+  uploadImages(
+    @UploadedFiles(new ParseFilePipeBuilder().build({ fileIsRequired: true }))
+    files: Express.Multer.File[],
+  ): UploadFileResponse[] {
+    if (!files?.length) throw new BadRequestException(FileErrors.FILE_REQUIRED);
 
-    return mapFileToResponse(file, FILE_FOLDERS.images);
+    files.forEach((file) => {
+      this.fileService.saveMetadata(FileFolders.IMAGES, file.filename, {
+        originalName: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+      });
+    });
+
+    return mapFilesToResponse(files, FileFolders.IMAGES);
   }
 
-  @Post('file')
+  @Post('files')
   @UseInterceptors(
-    FileInterceptor('file', createUploadOptions(FILE_FOLDERS.files, 'file')),
+    FilesInterceptor(
+      'files',
+      MAX_FILE_COUNT,
+      createUploadOptions(FileFolders.FILES, 'file'),
+    ),
   )
-  uploadFile(
-    @UploadedFile(new ParseFilePipeBuilder().build({ fileIsRequired: true }))
-    file: Express.Multer.File,
-  ): UploadFileResponse {
-    if (!file) throw new BadRequestException(FileErrors.FILE_REQUIRED);
+  uploadFiles(
+    @UploadedFiles(new ParseFilePipeBuilder().build({ fileIsRequired: true }))
+    files: Express.Multer.File[],
+  ): UploadFileResponse[] {
+    if (!files?.length) throw new BadRequestException(FileErrors.FILE_REQUIRED);
 
-    return mapFileToResponse(file, FILE_FOLDERS.files);
+    files.forEach((file) => {
+      this.fileService.saveMetadata(FileFolders.FILES, file.filename, {
+        originalName: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size,
+      });
+    });
+
+    return mapFilesToResponse(files, FileFolders.FILES);
   }
 
-  @Delete(':folder/:filename')
-  deleteFile(@Param() params: DeleteFileParamsDto): void {
-    this.fileService.removeFile(
-      params.folder as keyof typeof FILE_FOLDERS,
-      params.filename,
-    );
+  @Get(':fileId')
+  getFile(@Param() params: GetFileDto): StoredFileResponse {
+    const fileText = this.fileService.readFile(params.fileId);
+    const fileMeta = this.fileService.readMetadata(params.fileId);
+
+    if (!fileText || !fileMeta) {
+      throw new NotFoundException();
+    }
+
+    return {
+      fileId: params.fileId,
+      originalName: fileMeta.originalName,
+      mimetype: fileMeta.mimetype,
+      size: fileMeta.size,
+      data: fileText,
+    };
+  }
+
+  @Delete(':fileId')
+  deleteFile(@Param() params: DeleteFileDto): void {
+    this.fileService.removeFile(params.fileId);
   }
 }

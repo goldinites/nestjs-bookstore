@@ -4,14 +4,15 @@ import { randomUUID } from 'crypto';
 import { diskStorage } from 'multer';
 import type { MulterModuleOptions } from '@nestjs/platform-express';
 import {
-  FILE_MIME_TYPES,
-  IMAGE_MIME_TYPES,
+  IMAGE_UPLOAD_MIME_TYPES,
+  DOCUMENT_UPLOAD_MIME_TYPES,
   MAX_FILE_SIZE,
   MAX_IMAGE_SIZE,
   UPLOADS_PATH,
 } from '@/modules/file/constants/file.constants';
-import { FileFolder, UploadType } from '@/modules/file/types/file.types';
+import { UploadType } from '@/modules/file/types/file.types';
 import { FileErrors } from '@/modules/file/enums/errors.enum';
+import { FileFolders } from '@/modules/file/enums/folders.enum';
 
 const ensureDirectory = (directoryPath: string): void => {
   if (!existsSync(directoryPath)) {
@@ -19,7 +20,7 @@ const ensureDirectory = (directoryPath: string): void => {
   }
 };
 
-export const buildUploadPath = (folder: FileFolder): string => {
+export const buildUploadPath = (folder: FileFolders): string => {
   const destination = join(UPLOADS_PATH, folder);
   ensureDirectory(destination);
 
@@ -27,7 +28,7 @@ export const buildUploadPath = (folder: FileFolder): string => {
 };
 
 export const createUploadOptions = (
-  folder: FileFolder,
+  folder: FileFolders,
   type: UploadType = 'file',
 ): MulterModuleOptions => {
   const destination = buildUploadPath(folder);
@@ -41,12 +42,12 @@ export const createUploadOptions = (
       },
     }),
     fileFilter: (_req, file, callback) => {
-      if (type === 'image' && !IMAGE_MIME_TYPES.test(file.mimetype)) {
+      if (type === 'image' && !IMAGE_UPLOAD_MIME_TYPES.test(file.mimetype)) {
         callback(new Error(FileErrors.NOT_AVAILABLE_TYPE), false);
         return;
       }
 
-      if (type === 'file' && !FILE_MIME_TYPES.test(file.mimetype)) {
+      if (type === 'file' && !DOCUMENT_UPLOAD_MIME_TYPES.test(file.mimetype)) {
         callback(new Error(FileErrors.NOT_AVAILABLE_TYPE), false);
         return;
       }
