@@ -76,22 +76,6 @@ export class BookService {
     return updated;
   }
 
-  async updateBookImage(id: number, imageUrl: string): Promise<Book | null> {
-    const book: Book | null = await this.getBookById(id);
-
-    if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
-
-    const { affected } = await this.bookRepository.update(id, { imageUrl });
-
-    if (affected === 0) throw new BadRequestException(BookErrors.NOT_UPDATED);
-
-    const updated: Book | null = await this.getBookById(id);
-
-    if (!updated) throw new NotFoundException(BookErrors.NOT_FOUND);
-
-    return updated;
-  }
-
   async deleteBook(id: number): Promise<void> {
     const book: Book | null = await this.getBookById(id);
 

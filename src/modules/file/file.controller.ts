@@ -28,7 +28,7 @@ export class FileController {
   constructor(private readonly fileService: FileService) {}
 
   @Post('images')
-  @UseInterceptors(FilesUploadInterceptor(FileFolders.IMAGES, UploadType.IMAGE))
+  @UseInterceptors(FilesUploadInterceptor(UploadType.IMAGE))
   uploadImages(
     @UploadedFiles(RequiredFilePipe())
     files: Express.Multer.File[],
@@ -47,7 +47,7 @@ export class FileController {
   }
 
   @Post('files')
-  @UseInterceptors(FilesUploadInterceptor(FileFolders.FILES, UploadType.FILE))
+  @UseInterceptors(FilesUploadInterceptor(UploadType.FILE))
   uploadFiles(
     @UploadedFiles(RequiredFilePipe())
     files: Express.Multer.File[],

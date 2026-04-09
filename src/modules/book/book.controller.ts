@@ -100,7 +100,7 @@ export class BookController {
 
   @Patch(':id/image')
   @Permissions(Roles.ADMIN)
-  @UseInterceptors(FilesUploadInterceptor(FileFolders.IMAGES, UploadType.IMAGE))
+  @UseInterceptors(FilesUploadInterceptor(UploadType.IMAGE))
   async updateBookImage(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile(RequiredFilePipe())
@@ -119,10 +119,9 @@ export class BookController {
       file.filename,
     );
 
-    const book: Book | null = await this.bookService.updateBookImage(
-      id,
+    const book: Book | null = await this.bookService.updateBook(id, {
       imageUrl,
-    );
+    });
 
     if (!book) throw new BadRequestException(BookErrors.NOT_UPDATED);
 
