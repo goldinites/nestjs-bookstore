@@ -97,7 +97,12 @@ export class BookController {
   }
 
   @Patch(':id/image')
-  @UseInterceptors(FilesUploadInterceptor(UploadType.IMAGE))
+  @UseInterceptors(
+    FilesUploadInterceptor(UploadType.IMAGE, {
+      fieldName: 'image',
+      mode: 'single',
+    }),
+  )
   async updateBookImage(
     @Param('id', ParseIntPipe) id: number,
     @UploadedFile(RequiredFilePipe())

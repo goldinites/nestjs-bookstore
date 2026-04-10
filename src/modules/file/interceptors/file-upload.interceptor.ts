@@ -6,25 +6,33 @@ import {
   NestInterceptor,
   Type,
 } from '@nestjs/common';
-import { FilesInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { FileService } from '@/modules/file/file.service';
 import { UploadType } from '@/modules/file/enums/upload-type.enum';
 import { MAX_FILE_COUNT } from '@/modules/file/constants/file.constants';
+import { FilesUploadInterceptorOptions } from '@/modules/file/types/file.types';
 
 export function FilesUploadInterceptor(
   type: UploadType,
-  maxCount: number = MAX_FILE_COUNT,
+  options: FilesUploadInterceptorOptions = {},
 ): Type<NestInterceptor> {
+  const {
+    fieldName = 'files',
+    maxCount = MAX_FILE_COUNT,
+    mode = 'multiple',
+  } = options;
+
   @Injectable()
   class MixinInterceptor implements NestInterceptor {
     constructor(private readonly fileService: FileService) {}
 
     intercept(context: ExecutionContext, next: CallHandler) {
-      const interceptorClass = FilesInterceptor(
-        'files',
-        maxCount,
-        this.fileService.createUploadOptions(type),
-      );
+      const uploadOptions = this.fileService.createUploadOptions(type);
+
+      const interceptorClass =
+        mode === 'single'
+          ? FileInterceptor(fieldName, uploadOptions)
+          : FilesInterceptor(fieldName, maxCount, uploadOptions);
 
       const interceptorInstance = new interceptorClass();
 

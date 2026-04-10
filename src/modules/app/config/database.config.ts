@@ -14,7 +14,7 @@ export default registerAs('database', (): TypeOrmModuleOptions => {
     password: ensureNonEmpty(process.env.DB_PASSWORD, 'DB_PASSWORD'),
     database: ensureNonEmpty(process.env.DB_NAME, 'DB_NAME'),
     autoLoadEntities: true,
-    synchronize: process.env.NODE_ENV === 'development',
+    synchronize: false,
     logging: process.env.NODE_ENV === 'development',
   };
 });
