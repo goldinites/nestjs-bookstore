@@ -1,11 +1,4 @@
-import { FileFolders } from '@/modules/file/enums/folders.enum';
-
 export type FileReadAs = 'text' | 'base64' | 'unknown';
-
-export type FilePath = {
-  folder: FileFolders;
-  path: string;
-};
 
 export type UploadFileResponse = {
   fileId: string;

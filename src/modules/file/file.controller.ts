@@ -15,7 +15,6 @@ import type {
   StoredFileResponse,
   UploadFileResponse,
 } from './types/file.types';
-import { FileFolders } from '@/modules/file/enums/folders.enum';
 import { mapFilesToResponse } from '@/modules/file/mappers/file-to-response.mapper';
 import { FileErrors } from '@/modules/file/enums/errors.enum';
 import { GetFileDto } from '@/modules/file/dto/get-file.dto';
@@ -37,14 +36,10 @@ export class FileController {
     if (!files?.length) throw new BadRequestException(FileErrors.FILE_REQUIRED);
 
     files.forEach((file) => {
-      this.fileService.saveMetadata(
-        FileFolders.IMAGES,
-        file.filename,
-        prepareFileMetadata(file),
-      );
+      this.fileService.saveMetadata(file.filename, prepareFileMetadata(file));
     });
 
-    return mapFilesToResponse(files, FileFolders.IMAGES);
+    return mapFilesToResponse(files);
   }
 
   @Post('files')
@@ -56,14 +51,10 @@ export class FileController {
     if (!files?.length) throw new BadRequestException(FileErrors.FILE_REQUIRED);
 
     files.forEach((file) => {
-      this.fileService.saveMetadata(
-        FileFolders.FILES,
-        file.filename,
-        prepareFileMetadata(file),
-      );
+      this.fileService.saveMetadata(file.filename, prepareFileMetadata(file));
     });
 
-    return mapFilesToResponse(files, FileFolders.FILES);
+    return mapFilesToResponse(files);
   }
 
   @Get(':fileId')

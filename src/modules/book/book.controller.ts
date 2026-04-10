@@ -31,7 +31,6 @@ import {
 } from '@/modules/book/mappers/book-to-response.mapper';
 import { BookErrors } from '@/modules/book/enums/errors.enum';
 import { FileService } from '@/modules/file/file.service';
-import { FileFolders } from '@/modules/file/enums/folders.enum';
 import { UploadType } from '@/modules/file/enums/upload-type.enum';
 import { FilesUploadInterceptor } from '@/modules/file/interceptors/file-upload.interceptor';
 import { RequiredFilePipe } from '@/modules/file/pipes/required-file.pipe';
@@ -106,16 +105,9 @@ export class BookController {
   ): Promise<BookResponse> {
     if (!image) throw new BadRequestException(BookErrors.IMAGE_REQUIRED);
 
-    this.fileService.saveMetadata(
-      FileFolders.IMAGES,
-      image.filename,
-      prepareFileMetadata(image),
-    );
+    this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
 
-    const imageUrl = this.fileService.buildPublicUrl(
-      FileFolders.IMAGES,
-      image.filename,
-    );
+    const imageUrl = this.fileService.buildPublicUrl(image.filename);
 
     const book: Book | null = await this.bookService.updateBook(id, {
       imageUrl,

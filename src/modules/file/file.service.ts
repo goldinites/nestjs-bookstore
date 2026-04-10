@@ -17,18 +17,11 @@ import {
   UPLOADS_FOLDER,
   UPLOADS_PATH,
 } from './constants/file.constants';
-import {
-  FileMetadata,
-  FilePath,
-  FileReadAs,
-} from '@/modules/file/types/file.types';
-import { FileFolders } from '@/modules/file/enums/folders.enum';
+import { FileMetadata, FileReadAs } from '@/modules/file/types/file.types';
 import { UploadType } from '@/modules/file/enums/upload-type.enum';
 import type { MulterModuleOptions } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { randomUUID } from 'crypto';
-import { FileErrors } from '@/modules/file/enums/errors.enum';
-
 @Injectable()
 export class FileService {
   ensureDirectory(directoryPath: string): void {
@@ -37,18 +30,15 @@ export class FileService {
     }
   }
 
-  buildUploadPath(folder: FileFolders): string {
-    const destination = join(UPLOADS_PATH, folder);
+  buildUploadPath(): string {
+    const destination = join(UPLOADS_PATH);
     this.ensureDirectory(destination);
 
     return destination;
   }
 
-  createUploadOptions(
-    folder: FileFolders,
-    type: UploadType,
-  ): MulterModuleOptions | undefined {
-    const destination = this.buildUploadPath(folder);
+  createUploadOptions(type: UploadType): MulterModuleOptions | undefined {
+    const destination = this.buildUploadPath();
 
     return {
       storage: diskStorage({
@@ -83,47 +73,26 @@ export class FileService {
     };
   }
 
-  buildPublicUrl(folder: FileFolders, filename: string): string {
-    return `/${UPLOADS_FOLDER}/${folder}/${filename}`;
+  buildPublicUrl(filename: string): string {
+    return `/${UPLOADS_FOLDER}/${filename}`;
   }
 
-  getFilePath(folder: FileFolders, fileId: string): string {
-    return join(UPLOADS_PATH, folder, fileId);
+  getFilePath(fileId: string): string {
+    return join(UPLOADS_PATH, fileId);
   }
 
-  getMetadataPath(folder: FileFolders, fileId: string): string {
-    return `${this.getFilePath(folder, fileId)}.meta.json`;
+  getMetadataPath(fileId: string): string {
+    return `${this.getFilePath(fileId)}.meta.json`;
   }
 
-  saveMetadata(
-    folder: FileFolders,
-    fileId: string,
-    metadata: FileMetadata,
-  ): void {
-    writeFileSync(
-      this.getMetadataPath(folder, fileId),
-      JSON.stringify(metadata),
-    );
+  saveMetadata(fileId: string, metadata: FileMetadata): void {
+    writeFileSync(this.getMetadataPath(fileId), JSON.stringify(metadata));
   }
 
-  private getPossibleFilePaths(fileId: string): FilePath[] {
-    return [
-      {
-        folder: FileFolders.IMAGES,
-        path: this.getFilePath(FileFolders.IMAGES, fileId),
-      },
-      {
-        folder: FileFolders.FILES,
-        path: this.getFilePath(FileFolders.FILES, fileId),
-      },
-    ];
-  }
+  resolveFilePath(fileId: string): string | null {
+    const path = this.getFilePath(fileId);
 
-  resolveFilePath(fileId: string): FilePath | null {
-    return (
-      this.getPossibleFilePaths(fileId).find(({ path }) => existsSync(path)) ??
-      null
-    );
+    return existsSync(path) ? path : null;
   }
 
   readMetadata(fileId: string): FileMetadata | null {
@@ -131,7 +100,7 @@ export class FileService {
 
     if (!resolved) return null;
 
-    const metadataPath = this.getMetadataPath(resolved.folder, fileId);
+    const metadataPath = this.getMetadataPath(fileId);
 
     if (!existsSync(metadataPath)) return null;
 
@@ -150,7 +119,7 @@ export class FileService {
 
     if (!resolved) return null;
 
-    return readFileSync(resolved.path, 'base64');
+    return readFileSync(resolved, 'base64');
   }
 
   readFileAsText(fileId: string): string | null {
@@ -158,11 +127,11 @@ export class FileService {
 
     if (!resolved) return null;
 
-    return readFileSync(resolved.path, 'utf8');
+    return readFileSync(resolved, 'utf8');
   }
 
   readFile(fileId: string): string | null {
-    const resolved: FilePath | null = this.resolveFilePath(fileId);
+    const resolved: string | null = this.resolveFilePath(fileId);
 
     if (!resolved) return null;
 
@@ -188,10 +157,10 @@ export class FileService {
 
     if (!resolved) return;
 
-    const metadataPath = this.getMetadataPath(resolved.folder, fileId);
+    const metadataPath = this.getMetadataPath(fileId);
 
-    if (existsSync(resolved.path)) {
-      unlinkSync(resolved.path);
+    if (existsSync(resolved)) {
+      unlinkSync(resolved);
     }
 
     if (existsSync(metadataPath)) {
@@ -199,3 +168,5 @@ export class FileService {
     }
   }
 }
+
+import { FileErrors } from '@/modules/file/enums/errors.enum';
