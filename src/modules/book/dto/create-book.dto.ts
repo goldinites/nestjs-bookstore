@@ -22,8 +22,10 @@ export class CreateBookDto {
   @Max(9999)
   publishedYear: number;
 
-  @IsString()
-  genre: string;
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
+  categoryId: number;
 
   @IsString()
   language: string;

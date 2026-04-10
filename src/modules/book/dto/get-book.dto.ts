@@ -12,7 +12,7 @@ import {
 import type { FindOptionsOrderValue } from 'typeorm';
 import { toArray } from '@/modules/utils/to-array';
 
-export const BOOK_SORT_FIELDS: string[] = [
+export const BOOK_SORT_FIELDS = [
   'id',
   'title',
   'author',
@@ -22,6 +22,7 @@ export const BOOK_SORT_FIELDS: string[] = [
   'stockCount',
   'rating',
   'price',
+  'createdAt',
 ] as const;
 
 export type BookSortField = (typeof BOOK_SORT_FIELDS)[number];

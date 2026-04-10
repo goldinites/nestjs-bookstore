@@ -6,6 +6,6 @@ export type OrderItemResponse = {
   quantity: number;
   author: string;
   publishedYear: number;
-  genre: string;
+  // genre: string;
   language: string;
 };

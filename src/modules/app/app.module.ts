@@ -13,6 +13,7 @@ import { configSchema } from './validation/config.schema';
 import { OrderModule } from '@/modules/order/order.module';
 import { FileModule } from '@/modules/file/file.module';
 import { FrontendModule } from '@/modules/frontend/frontend.module';
+import { CategoryModule } from '@/modules/category/category.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { FrontendModule } from '@/modules/frontend/frontend.module';
     }),
     AuthModule,
     UserModule,
+    CategoryModule,
     BookModule,
     CartModule,
     OrderModule,

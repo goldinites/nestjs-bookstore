@@ -12,7 +12,7 @@ function mapOrderItemToResponse(orderItem: OrderItem): OrderItemResponse {
     quantity: orderItem.quantity,
     author: orderItem.book.author,
     publishedYear: orderItem.book.publishedYear,
-    genre: orderItem.book.genre,
+    // genre: orderItem.book.genre,
     language: orderItem.book.language,
   };
 }

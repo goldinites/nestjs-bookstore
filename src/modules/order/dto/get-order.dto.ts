@@ -11,7 +11,7 @@ import {
 import type { FindOptionsOrderValue } from 'typeorm';
 import { OrderStatus } from '@/modules/order/enums/status.enum';
 
-export const ORDER_SORT_FIELDS: string[] = ['status', 'createdAt'] as const;
+export const ORDER_SORT_FIELDS = ['id', 'status', 'createdAt'] as const;
 
 export type OrderSortField = (typeof ORDER_SORT_FIELDS)[number];
 

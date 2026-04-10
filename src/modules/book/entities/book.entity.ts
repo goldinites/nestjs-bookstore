@@ -4,7 +4,9 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
+import { Category } from '@/modules/category/entities/category.entity';
 
 @Entity()
 export class Book {
@@ -23,8 +25,8 @@ export class Book {
   @Column()
   publishedYear: number;
 
-  @Column({ length: 255 })
-  genre: string;
+  @ManyToOne(() => Category)
+  category: Category;
 
   @Column({ length: 255 })
   language: string;

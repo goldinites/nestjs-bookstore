@@ -4,7 +4,6 @@ export type BookResponse = {
   imageUrl: string;
   author: string;
   publishedYear: number;
-  genre: string;
   language: string;
   stockCount: number;
   rating: number;

@@ -30,8 +30,10 @@ export class UpdateBookDto {
   publishedYear?: number;
 
   @IsOptional()
-  @IsString()
-  genre?: string;
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
+  categoryId?: number;
 
   @IsOptional()
   @IsString()

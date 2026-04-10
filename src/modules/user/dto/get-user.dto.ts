@@ -11,7 +11,7 @@ import {
 import { Roles } from '@/modules/user/enums/roles.enum';
 import type { FindOptionsOrderValue } from 'typeorm';
 
-export const USER_SORT_FIELDS: string[] = [
+export const USER_SORT_FIELDS = [
   'id',
   'firstName',
   'lastName',
