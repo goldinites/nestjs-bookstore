@@ -37,7 +37,7 @@ export class BookService {
     query?: GetBookReqDto,
     select?: FindOptionsSelect<Book>,
   ): Promise<Book[]> {
-    const { field, direction, limit, offset, ...rest } = {
+    const { field, direction, limit, offset, withCategory, ...rest } = {
       ...getBookDefaultParams,
       ...query,
     };
@@ -50,7 +50,7 @@ export class BookService {
       take: limit,
       skip: offset,
       select,
-      relations: { category: true },
+      relations: { category: withCategory },
     });
   }
 

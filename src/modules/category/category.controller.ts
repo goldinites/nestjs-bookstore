@@ -10,6 +10,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { CategoryService } from '@/modules/category/category.service';
 import { CreateCategoryDto } from '@/modules/category/dto/create-category.dto';
@@ -21,7 +22,13 @@ import {
   mapCategoriesToResponse,
   mapCategoryToResponse,
 } from '@/modules/category/mappers/category-to-response.mapper';
+import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
+import { RolesGuard } from '@/modules/auth/guards/roles.guard';
+import { Permissions } from '@/modules/auth/decorators/permissions.decorator';
+import { Roles } from '@/modules/user/enums/roles.enum';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Permissions(Roles.ADMIN)
 @Controller('category')
 class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
