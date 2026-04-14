@@ -6,6 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from '@/modules/book/entities/book.entity';
 import {
+  DataSource,
   FindOptionsSelect,
   FindOptionsWhere,
   ILike,
@@ -29,7 +30,10 @@ export class BookService {
   constructor(
     @InjectRepository(Book)
     private bookRepository: Repository<Book>,
+
     private categoryService: CategoryService,
+
+    private readonly dataSource: DataSource,
   ) {}
 
   async getBooks(
@@ -78,18 +82,24 @@ export class BookService {
   }
 
   async createBook(payload: CreateBookDto): Promise<Book> {
-    const { categoryId, ...rest } = payload;
+    return await this.dataSource.transaction(async (manager) => {
+      const bookRepository = manager.getRepository(Book);
+      const categoryRepository = manager.getRepository(Category);
+      const { categoryId, ...rest } = payload;
 
-    const category = await this.categoryService.getCategoryById(categoryId);
+      const category = await categoryRepository.findOneBy({ id: categoryId });
 
-    if (!category) throw new NotFoundException(CategoryErrors.NOT_FOUND);
+      if (!category) throw new NotFoundException(CategoryErrors.NOT_FOUND);
 
-    const book = this.bookRepository.create({
-      ...rest,
-      category,
+      const book = bookRepository.create({
+        ...rest,
+        category,
+      });
+
+      await manager.increment(Category, { id: categoryId }, 'booksCount', 1);
+
+      return await bookRepository.save(book);
     });
-
-    return await this.bookRepository.save(book);
   }
 
   async importBooks(payload: CreateBookDto[]): Promise<Book[]> {

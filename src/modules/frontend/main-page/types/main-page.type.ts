@@ -1,16 +1,11 @@
 import { BookResponse } from '@/modules/book/types/book.type';
-
-export type BookCategory = {
-  id: string;
-  name: string;
-  imageUrl: string;
-};
+import { CategoryResponse } from '@/modules/category/types/category.type';
 
 export type MainPageData = {
   banners?: unknown;
   popularBooks?: BookResponse[];
   newestBooks?: BookResponse[];
-  categories?: BookCategory[];
+  categories?: CategoryResponse[];
   discountedBooks?: BookResponse[];
   about?: string;
 };

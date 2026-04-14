@@ -12,7 +12,7 @@ import {
 import type { FindOptionsOrderValue } from 'typeorm';
 import { toArray } from '@/modules/utils/to-array';
 
-export const CATEGORY_SORT_FIELDS = ['id', 'title'] as const;
+export const CATEGORY_SORT_FIELDS = ['id', 'title', 'booksCount'] as const;
 
 export type CategorySortField = (typeof CATEGORY_SORT_FIELDS)[number];
 
