@@ -10,7 +10,7 @@ import { CreateCategoryDto } from '@/modules/category/dto/create-category.dto';
 import { UpdateCategoryDto } from '@/modules/category/dto/update-category.dto';
 import { CategoryErrors } from '@/modules/category/enums/errors.enum';
 import { GetCategoryReqDto } from '@/modules/category/dto/get-category.dto';
-import { getBookDefaultParams } from '@/modules/book/constants/get-book.constants';
+import { getCategoryDefaultParams } from '@/modules/category/constants/get-category.constants';
 
 @Injectable()
 export class CategoryService {
@@ -21,7 +21,7 @@ export class CategoryService {
 
   async getCategories(query: GetCategoryReqDto): Promise<Category[]> {
     const { field, direction, limit, offset, withBooks, ...where } = {
-      ...getBookDefaultParams,
+      ...getCategoryDefaultParams,
       ...query,
     };
 
