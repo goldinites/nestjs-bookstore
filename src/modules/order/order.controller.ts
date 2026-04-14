@@ -34,8 +34,6 @@ export class OrderController {
   ): Promise<OrderResponse[]> {
     const orders: Order[] = await this.orderService.getOrders(userId, query);
 
-    if (orders.length === 0) return [];
-
     return mapOrdersToResponse(orders);
   }
 

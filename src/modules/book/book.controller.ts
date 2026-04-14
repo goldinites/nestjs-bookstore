@@ -49,8 +49,6 @@ export class BookController {
   async getBooks(@Query() query: GetBookReqDto): Promise<BookResponse[]> {
     const books: Book[] = await this.bookService.getBooks(query);
 
-    if (books.length === 0) return [];
-
     return mapBooksToResponse(books);
   }
 
@@ -78,8 +76,6 @@ export class BookController {
     payload: CreateBookDto[],
   ): Promise<BookResponse[]> {
     const books: Book[] = await this.bookService.importBooks(payload);
-
-    if (books.length === 0) return [];
 
     return mapBooksToResponse(books);
   }

@@ -5,7 +5,13 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from '@/modules/book/entities/book.entity';
-import { FindOptionsSelect, ILike, In, Repository } from 'typeorm';
+import {
+  FindOptionsSelect,
+  FindOptionsWhere,
+  ILike,
+  In,
+  Repository,
+} from 'typeorm';
 import { GetBookReqDto } from '@/modules/book/dto/get-book.dto';
 import { getBookDefaultParams } from '@/modules/book/constants/get-book.constants';
 import { BookErrors } from '@/modules/book/enums/errors.enum';
@@ -13,6 +19,7 @@ import { CreateBookDto } from '@/modules/book/dto/create-book.dto';
 import { UpdateBookDto } from '@/modules/book/dto/update-book.dto';
 import { normalizeQuery } from '@/modules/utils/query/normalize-query';
 import { Category } from '@/modules/category/entities/category.entity';
+import { CategoryErrors } from '@/modules/category/enums/errors.enum';
 
 @Injectable()
 export class BookService {
@@ -30,24 +37,12 @@ export class BookService {
     query?: GetBookReqDto,
     select?: FindOptionsSelect<Book>,
   ): Promise<Book[]> {
-    const { field, direction, limit, offset, genre, ...rest } = {
+    const { field, direction, limit, offset, ...rest } = {
       ...getBookDefaultParams,
       ...query,
     };
 
-    const normalized = normalizeQuery(rest, {
-      multiFields: this.multiFieldsValue,
-      rangeFields: this.rangeFieldsValue,
-    });
-
-    const where = genre?.length
-      ? genre.map((genreTitle) => ({
-          ...normalized,
-          category: {
-            title: ILike(`%${genreTitle}%`),
-          },
-        }))
-      : [normalized];
+    const where = this.prepareBookFindWhere(rest);
 
     return await this.bookRepository.find({
       where,
@@ -57,6 +52,24 @@ export class BookService {
       select,
       relations: { category: true },
     });
+  }
+
+  private prepareBookFindWhere(query: GetBookReqDto): FindOptionsWhere<Book>[] {
+    const { genre, ...rest } = query;
+
+    const normalized = normalizeQuery<GetBookReqDto, Book>(rest, {
+      multiFields: this.multiFieldsValue,
+      rangeFields: this.rangeFieldsValue,
+    });
+
+    return genre?.length
+      ? genre.map((title) => ({
+          ...normalized,
+          category: {
+            title: ILike(`%${title}%`),
+          },
+        }))
+      : [normalized];
   }
 
   async getBookById(id: number): Promise<Book | null> {
@@ -70,9 +83,7 @@ export class BookService {
       id: categoryId,
     });
 
-    if (!category) {
-      throw new BadRequestException('Category not found');
-    }
+    if (!category) throw new NotFoundException(CategoryErrors.NOT_FOUND);
 
     const book = this.bookRepository.create({
       ...rest,
@@ -97,9 +108,7 @@ export class BookService {
     const books = payload.map(({ categoryId, ...rest }) => {
       const category = categoryMap.get(categoryId);
 
-      if (!category) {
-        throw new BadRequestException('Category not found');
-      }
+      if (!category) throw new NotFoundException(CategoryErrors.NOT_FOUND);
 
       return this.bookRepository.create({
         ...rest,
@@ -122,9 +131,7 @@ export class BookService {
     if (categoryId !== undefined) {
       category = await this.categoryRepository.findOneBy({ id: categoryId });
 
-      if (!category) {
-        throw new BadRequestException('Category not found');
-      }
+      if (!category) throw new NotFoundException(CategoryErrors.NOT_FOUND);
     }
 
     const result = await this.bookRepository.update(id, {
