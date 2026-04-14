@@ -5,11 +5,6 @@ import { normalizeQueryBetween } from '@/modules/utils/query/normalize-query-bet
 type NormalizeQueryOptions = {
   multiFields?: string[];
   rangeFields?: string[];
-  listFields?: {
-    field: string;
-    values?: string[];
-    buildWhere: (value: string) => Record<string, unknown>;
-  }[];
 };
 
 export function normalizeQuery<T, K>(
