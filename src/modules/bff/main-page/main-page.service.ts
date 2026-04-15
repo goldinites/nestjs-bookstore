@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { BookService } from '@/modules/book/book.service';
-import { MainPageData } from '@/modules/frontend/main-page/types/main-page.type';
+import { MainPageData } from '@/modules/bff/main-page/types/main-page.type';
 import { mapBooksToResponse } from '@/modules/book/mappers/book-to-response.mapper';
 import { BookResponse } from '@/modules/book/types/book.type';
 import { CategoryResponse } from '@/modules/category/types/category.type';

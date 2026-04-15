@@ -12,7 +12,7 @@ import throttlerConfig from './config/throttler.config';
 import { configSchema } from './validation/config.schema';
 import { OrderModule } from '@/modules/order/order.module';
 import { FileModule } from '@/modules/file/file.module';
-import { FrontendModule } from '@/modules/frontend/frontend.module';
+import { BackendForFrontendModule } from '@/modules/bff/bff.module';
 import { CategoryModule } from '@/modules/category/category.module';
 
 @Module({
@@ -55,7 +55,7 @@ import { CategoryModule } from '@/modules/category/category.module';
     BookModule,
     CartModule,
     OrderModule,
-    FrontendModule,
+    BackendForFrontendModule,
     FileModule,
   ],
 })
