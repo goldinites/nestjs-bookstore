@@ -228,7 +228,7 @@ export class BookService {
         await manager.decrement(
           Category,
           { id: book.category.id },
-          'booksCount',
+          BOOKS_COUNT_PROPERTY,
           1,
         );
       }
