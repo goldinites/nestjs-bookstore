@@ -5,13 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Book } from '@/modules/book/entities/book.entity';
-import {
-  DataSource,
-  FindOptionsSelect,
-  FindOptionsWhere,
-  ILike,
-  Repository,
-} from 'typeorm';
+import { DataSource, FindOptionsWhere, ILike, Repository } from 'typeorm';
 import { GetBookReqDto } from '@/modules/book/dto/get-book.dto';
 import { getBookDefaultParams } from '@/modules/book/constants/get-book.constants';
 import { BookErrors } from '@/modules/book/enums/errors.enum';
@@ -53,7 +47,7 @@ export class BookService {
       : [normalized];
   }
 
-  async getBooks(query?: GetBookReqDto, select?: FindOptionsSelect<Book>) {
+  async getBooks(query?: GetBookReqDto) {
     const { field, direction, limit, offset, ...rest } = {
       ...getBookDefaultParams,
       ...query,
@@ -66,7 +60,6 @@ export class BookService {
       order: { [field]: direction },
       take: limit,
       skip: offset,
-      select,
       relations: { category: true },
     });
   }

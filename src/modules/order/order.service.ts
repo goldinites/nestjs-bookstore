@@ -28,7 +28,7 @@ export class OrderService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getOrders(userId: number, query: GetOrderReqDto) {
+  async getOrders(userId: number, query?: GetOrderReqDto) {
     const { field, direction, limit, offset, ...rest } = {
       ...getOrderDefaultParams,
       ...query,
