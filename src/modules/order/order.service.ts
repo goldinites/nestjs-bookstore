@@ -36,9 +36,7 @@ export class OrderService {
 
     const [content, total] = await this.orderRepository.findAndCount({
       where: { user: { id: userId }, ...rest },
-      order: {
-        [field]: direction,
-      },
+      order: { [field]: direction },
       take: limit,
       skip: offset,
       relations: { items: true },
