@@ -16,15 +16,16 @@ import { normalizeQuery } from '@/modules/utils/query/normalize-query';
 @Injectable()
 export class CategoryService {
   private multiFieldsValue: string[] = ['title'] as const;
+
   constructor(
     @InjectRepository(Category)
-    private categoryRepository: Repository<Category>,
+    private readonly categoryRepository: Repository<Category>,
   ) {}
 
   async getCategories(
     query?: GetCategoryReqDto,
     select?: FindOptionsSelect<Category>,
-  ): Promise<Category[]> {
+  ) {
     const { field, direction, limit, offset, withBooks, ...rest } = {
       ...getCategoryDefaultParams,
       ...query,
@@ -34,7 +35,7 @@ export class CategoryService {
       multiFields: this.multiFieldsValue,
     });
 
-    return await this.categoryRepository.find({
+    const [content, total] = await this.categoryRepository.findAndCount({
       where,
       order: { [field]: direction },
       take: limit,
@@ -42,6 +43,8 @@ export class CategoryService {
       select,
       relations: { books: withBooks },
     });
+
+    return { content, total };
   }
 
   async getCategoryById(id: number): Promise<Category | null> {

@@ -21,7 +21,7 @@ import { Permissions } from '@/modules/auth/decorators/permissions.decorator';
 import { RolesGuard } from '@/modules/auth/guards/roles.guard';
 import { Roles } from '@/modules/user/enums/roles.enum';
 import { GetUserReqDto } from '@/modules/user/dto/get-user.dto';
-import { UserResponse } from '@/modules/user/types/user.type';
+import { GetUsersResponse, UserResponse } from '@/modules/user/types/user.type';
 import {
   mapUsersToResponse,
   mapUserToResponse,
@@ -35,10 +35,10 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async getUsers(@Query() query: GetUserReqDto): Promise<UserResponse[]> {
-    const users: User[] = await this.userService.getUsers(query);
+  async getUsers(@Query() query: GetUserReqDto): Promise<GetUsersResponse> {
+    const { content, total } = await this.userService.getUsers(query);
 
-    return mapUsersToResponse(users);
+    return { content: mapUsersToResponse(content), total };
   }
 
   @Get(':id')

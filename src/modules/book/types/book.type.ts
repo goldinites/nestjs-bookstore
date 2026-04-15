@@ -1,5 +1,3 @@
-import { CategoryResponse } from '@/modules/category/types/category.type';
-
 export type BookResponse = {
   id: number;
   title: string;
@@ -10,5 +8,10 @@ export type BookResponse = {
   stockCount: number;
   rating: number;
   price: number;
-  category?: CategoryResponse;
+  genre: string;
+};
+
+export type GetBooksResponse = {
+  content: BookResponse[];
+  total: number;
 };

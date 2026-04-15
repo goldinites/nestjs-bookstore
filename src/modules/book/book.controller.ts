@@ -24,7 +24,7 @@ import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '@/modules/auth/guards/roles.guard';
 import { Permissions } from '@/modules/auth/decorators/permissions.decorator';
 import { Roles } from '@/modules/user/enums/roles.enum';
-import { BookResponse } from '@/modules/book/types/book.type';
+import { BookResponse, GetBooksResponse } from '@/modules/book/types/book.type';
 import {
   mapBooksToResponse,
   mapBookToResponse,
@@ -46,10 +46,10 @@ export class BookController {
   ) {}
 
   @Get()
-  async getBooks(@Query() query: GetBookReqDto): Promise<BookResponse[]> {
-    const books: Book[] = await this.bookService.getBooks(query);
+  async getBooks(@Query() query: GetBookReqDto): Promise<GetBooksResponse> {
+    const { content, total } = await this.bookService.getBooks(query);
 
-    return mapBooksToResponse(books);
+    return { content: mapBooksToResponse(content), total };
   }
 
   @Get(':id')

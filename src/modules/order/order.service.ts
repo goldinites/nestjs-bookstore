@@ -22,19 +22,19 @@ import { PURCHASES_COUNT_PROPERTY } from '@/modules/book/constants/book.constant
 export class OrderService {
   constructor(
     @InjectRepository(Order)
-    private orderRepository: Repository<Order>,
+    private readonly orderRepository: Repository<Order>,
 
     @InjectDataSource()
-    private dataSource: DataSource,
+    private readonly dataSource: DataSource,
   ) {}
 
-  async getOrders(userId: number, query: GetOrderReqDto): Promise<Order[]> {
+  async getOrders(userId: number, query: GetOrderReqDto) {
     const { field, direction, limit, offset, ...rest } = {
       ...getOrderDefaultParams,
       ...query,
     };
 
-    return await this.orderRepository.find({
+    const [content, total] = await this.orderRepository.findAndCount({
       where: { user: { id: userId }, ...rest },
       order: {
         [field]: direction,
@@ -43,6 +43,8 @@ export class OrderService {
       skip: offset,
       relations: { items: true },
     });
+
+    return { content, total };
   }
 
   async getOrderById(userId: number, id: number): Promise<Order | null> {

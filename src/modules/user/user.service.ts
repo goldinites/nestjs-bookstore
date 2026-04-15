@@ -18,21 +18,23 @@ import { Roles } from '@/modules/user/enums/roles.enum';
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
   ) {}
 
-  async getUsers(query?: GetUserReqDto): Promise<User[]> {
+  async getUsers(query?: GetUserReqDto) {
     const { field, direction, limit, offset, ...where } = {
       ...getUserDefaultParams,
       ...query,
     };
 
-    return await this.userRepository.find({
+    const [content, total] = await this.userRepository.findAndCount({
       where,
       order: { [field]: direction },
       take: limit,
       skip: offset,
     });
+
+    return { content, total };
   }
 
   async getUserById(id: number): Promise<User | null> {

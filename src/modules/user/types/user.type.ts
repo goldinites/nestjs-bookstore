@@ -7,3 +7,8 @@ export type UserResponse = {
   email: string;
   role: Roles;
 };
+
+export type GetUsersResponse = {
+  content: UserResponse[];
+  total: number;
+};

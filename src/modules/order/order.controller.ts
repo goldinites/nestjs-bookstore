@@ -15,7 +15,10 @@ import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { OrderService } from '@/modules/order/order.service';
 import { Order } from '@/modules/order/entities/order.entity';
 import { OrderErrors } from './enums/errors.enum';
-import { OrderResponse } from '@/modules/order/types/order.type';
+import {
+  GetOrdersResponse,
+  OrderResponse,
+} from '@/modules/order/types/order.type';
 import {
   mapOrdersToResponse,
   mapOrderToResponse,
@@ -31,10 +34,10 @@ export class OrderController {
   async getOrders(
     @CurrentUser() { userId }: AuthUser,
     @Query() query: GetOrderReqDto,
-  ): Promise<OrderResponse[]> {
-    const orders: Order[] = await this.orderService.getOrders(userId, query);
+  ): Promise<GetOrdersResponse> {
+    const { content, total } = await this.orderService.getOrders(userId, query);
 
-    return mapOrdersToResponse(orders);
+    return { content: mapOrdersToResponse(content), total };
   }
 
   @Get(':orderId')

@@ -30,9 +30,9 @@ import { Roles } from '@/modules/user/enums/roles.enum';
 @Injectable()
 export class AuthService {
   constructor(
-    private jwtService: JwtService,
-    private userService: UserService,
-    private redisTokenService: RedisTokenService,
+    private readonly jwtService: JwtService,
+    private readonly userService: UserService,
+    private readonly redisTokenService: RedisTokenService,
     private readonly configService: ConfigService,
   ) {}
 

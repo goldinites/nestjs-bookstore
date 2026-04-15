@@ -16,7 +16,7 @@ import { BookErrors } from '@/modules/book/enums/errors.enum';
 export class CartService {
   constructor(
     @InjectRepository(Cart)
-    private cartRepository: Repository<Cart>,
+    private readonly cartRepository: Repository<Cart>,
 
     @InjectDataSource()
     private readonly dataSource: DataSource,

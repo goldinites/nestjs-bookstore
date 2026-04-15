@@ -4,7 +4,7 @@ import { MainPageData } from '@/modules/frontend/main-page/types/main-page.type'
 
 @Injectable()
 export class FrontendService {
-  constructor(private mainPageService: MainPageService) {}
+  constructor(private readonly mainPageService: MainPageService) {}
   async getMainPageData(): Promise<MainPageData> {
     return await this.mainPageService.buildMainPageData();
   }

@@ -8,3 +8,8 @@ export type CategoryResponse = {
   imageUrl?: string;
   books?: BookResponse[];
 };
+
+export type GetCategoriesResponse = {
+  content: CategoryResponse[];
+  total: number;
+};

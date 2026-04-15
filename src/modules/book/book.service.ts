@@ -29,29 +29,28 @@ export class BookService {
 
   constructor(
     @InjectRepository(Book)
-    private bookRepository: Repository<Book>,
+    private readonly bookRepository: Repository<Book>,
     private readonly dataSource: DataSource,
   ) {}
 
-  async getBooks(
-    query?: GetBookReqDto,
-    select?: FindOptionsSelect<Book>,
-  ): Promise<Book[]> {
-    const { field, direction, limit, offset, withCategory, ...rest } = {
+  async getBooks(query?: GetBookReqDto, select?: FindOptionsSelect<Book>) {
+    const { field, direction, limit, offset, ...rest } = {
       ...getBookDefaultParams,
       ...query,
     };
 
     const where = this.prepareBooksFindWhere(rest);
 
-    return await this.bookRepository.find({
+    const [content, total] = await this.bookRepository.findAndCount({
       where,
       order: { [field]: direction },
       take: limit,
       skip: offset,
       select,
-      relations: { category: withCategory },
+      relations: { category: true },
     });
+
+    return { content, total };
   }
 
   private prepareBooksFindWhere(

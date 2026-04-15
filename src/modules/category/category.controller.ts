@@ -20,7 +20,10 @@ import { CreateCategoryDto } from '@/modules/category/dto/create-category.dto';
 import { UpdateCategoryDto } from '@/modules/category/dto/update-category.dto';
 import { GetCategoryReqDto } from '@/modules/category/dto/get-category.dto';
 import { CategoryErrors } from '@/modules/category/enums/errors.enum';
-import { CategoryResponse } from '@/modules/category/types/category.type';
+import {
+  CategoryResponse,
+  GetCategoriesResponse,
+} from '@/modules/category/types/category.type';
 import {
   mapCategoriesToResponse,
   mapCategoryToResponse,
@@ -49,10 +52,13 @@ class CategoryController {
   @Get()
   async getCategories(
     @Query() query: GetCategoryReqDto,
-  ): Promise<CategoryResponse[]> {
-    const categories = await this.categoryService.getCategories(query);
+  ): Promise<GetCategoriesResponse> {
+    const { content, total } = await this.categoryService.getCategories(query);
 
-    return mapCategoriesToResponse(categories, query.withBooks);
+    return {
+      content: mapCategoriesToResponse(content, query.withBooks),
+      total,
+    };
   }
 
   @Get(':id')

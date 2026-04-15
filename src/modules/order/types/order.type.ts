@@ -9,3 +9,8 @@ export type OrderResponse = {
   createdAt: Date;
   updatedAt: Date;
 };
+
+export type GetOrdersResponse = {
+  content: OrderResponse[];
+  total: number;
+};
