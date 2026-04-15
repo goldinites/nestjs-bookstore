@@ -23,21 +23,33 @@ export class MainPageService {
     return mapBooksToResponse(books);
   }
 
-  async getBooksCategories() {
+  async getPopularBooksCategories() {
     const categories = await this.categoryService.getCategories({
       field: 'booksCount',
       direction: 'DESC',
       limit: 10,
-      withBooks: true,
     });
 
     return mapCategoriesToResponse(categories);
   }
 
+  async getPopularBooks(): Promise<BookResponse[]> {
+    const books: Book[] = await this.bookService.getBooks({
+      field: 'purchasesCount',
+      direction: 'DESC',
+    });
+
+    return mapBooksToResponse(books);
+  }
+
   async buildMainPageData(): Promise<MainPageData> {
     const newestBooks: BookResponse[] = await this.getNewestBooks();
-    const categories: CategoryResponse[] = await this.getBooksCategories();
 
-    return { newestBooks, categories };
+    const popularCategories: CategoryResponse[] =
+      await this.getPopularBooksCategories();
+
+    const popularBooks: BookResponse[] = await this.getPopularBooks();
+
+    return { newestBooks, popularCategories, popularBooks };
   }
 }

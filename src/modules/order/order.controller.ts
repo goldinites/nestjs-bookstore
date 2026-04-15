@@ -63,6 +63,16 @@ export class OrderController {
     return mapOrderToResponse(order);
   }
 
+  @Patch('complete/:orderId')
+  async completeOrder(
+    @CurrentUser() { userId }: AuthUser,
+    @Param('orderId', ParseIntPipe) orderId: number,
+  ): Promise<OrderResponse> {
+    const order = await this.orderService.completeOrder(userId, orderId);
+
+    return mapOrderToResponse(order);
+  }
+
   @Patch('cancel/:orderId')
   async cancelOrder(
     @CurrentUser() { userId }: AuthUser,

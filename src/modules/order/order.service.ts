@@ -16,6 +16,7 @@ import { OrderErrors } from '@/modules/order/enums/errors.enum';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { GetOrderReqDto } from '@/modules/order/dto/get-order.dto';
 import { getOrderDefaultParams } from '@/modules/order/constants/get-order.constants';
+import { PURCHASES_COUNT_PROPERTY } from '@/modules/book/constants/book.constants';
 
 @Injectable()
 export class OrderService {
@@ -125,6 +126,45 @@ export class OrderService {
       if (!createdOrder) throw new BadRequestException(OrderErrors.NOT_CREATED);
 
       return createdOrder;
+    });
+  }
+
+  async completeOrder(userId: number, id: number): Promise<Order> {
+    return await this.dataSource.transaction(async (manager) => {
+      const orderRepository = manager.getRepository(Order);
+      const bookRepository = manager.getRepository(Book);
+
+      const order: Order | null = await orderRepository.findOne({
+        where: { id, user: { id: userId } },
+        relations: { items: true },
+      });
+
+      if (!order) throw new NotFoundException(OrderErrors.NOT_FOUND);
+
+      if (order.status === OrderStatus.COMPLETED) {
+        throw new BadRequestException(OrderErrors.NOT_COMPLETED);
+      }
+
+      if (order.status === OrderStatus.CANCELLED) {
+        throw new BadRequestException(OrderErrors.NOT_COMPLETED);
+      }
+
+      for (const item of order.items) {
+        await bookRepository.increment(
+          { id: item.book.id },
+          PURCHASES_COUNT_PROPERTY,
+          item.quantity,
+        );
+      }
+
+      order.status = OrderStatus.COMPLETED;
+
+      const updatedOrder = await orderRepository.save(order);
+
+      if (!updatedOrder)
+        throw new BadRequestException(OrderErrors.NOT_COMPLETED);
+
+      return updatedOrder;
     });
   }
 

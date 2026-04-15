@@ -40,6 +40,9 @@ export class Book {
   @Column({ type: 'numeric', precision: 10, scale: 2, default: 0 })
   price: number;
 
+  @Column({ type: 'int', default: 0 })
+  purchasesCount: number;
+
   @CreateDateColumn()
   createdAt: Date;
 

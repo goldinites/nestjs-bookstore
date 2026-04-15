@@ -3,9 +3,9 @@ import { CategoryResponse } from '@/modules/category/types/category.type';
 
 export type MainPageData = {
   banners?: unknown;
-  popularBooks?: BookResponse[];
   newestBooks?: BookResponse[];
-  categories?: CategoryResponse[];
+  popularCategories?: CategoryResponse[];
+  popularBooks?: BookResponse[];
   discountedBooks?: BookResponse[];
   about?: string;
 };
