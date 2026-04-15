@@ -27,24 +27,60 @@ export class BookService {
     private readonly dataSource: DataSource,
   ) {}
 
-  private prepareBooksFindWhere(
-    query: GetBookReqDto,
+  private prepareBooksGenresFilter(
+    query: FindOptionsWhere<Book>,
+    genre?: string[],
   ): FindOptionsWhere<Book>[] {
-    const { genre, ...rest } = query;
-
-    const normalized = normalizeQuery<GetBookReqDto, Book>(rest, {
-      multiFields: this.multiFieldsValue,
-      rangeFields: this.rangeFieldsValue,
-    });
-
     return genre?.length
       ? genre.map((title) => ({
-          ...normalized,
+          ...query,
           category: {
             title: ILike(`%${title}%`),
           },
         }))
-      : [normalized];
+      : [query];
+  }
+
+  private searchBooks(
+    baseWhere: FindOptionsWhere<Book>[],
+    searchQuery?: string,
+  ) {
+    const queryValue = searchQuery?.trim();
+
+    if (!queryValue) {
+      return baseWhere;
+    }
+
+    const searchWhere: FindOptionsWhere<Book>[] = [];
+
+    for (const item of baseWhere) {
+      searchWhere.push(
+        { ...item, title: ILike(`%${queryValue}%`) },
+        { ...item, author: ILike(`%${queryValue}%`) },
+        { ...item, description: ILike(`%${queryValue}%`) },
+        { ...item, language: ILike(`%${queryValue}%`) },
+      );
+    }
+
+    return searchWhere;
+  }
+
+  private prepareBooksFindWhere(
+    query: GetBookReqDto,
+  ): FindOptionsWhere<Book>[] {
+    const { genre, q, ...rest } = query;
+
+    const normalizedQuery = normalizeQuery<GetBookReqDto, Book>(rest, {
+      multiFields: this.multiFieldsValue,
+      rangeFields: this.rangeFieldsValue,
+    });
+
+    const withGenreFilter = this.prepareBooksGenresFilter(
+      normalizedQuery,
+      genre,
+    );
+
+    return this.searchBooks(withGenreFilter, q);
   }
 
   async getBooks(query?: GetBookReqDto) {

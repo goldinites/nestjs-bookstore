@@ -37,6 +37,11 @@ export class GetBookReqDto {
   @IsOptional()
   @IsString()
   @Type(() => String)
+  q?: string;
+
+  @IsOptional()
+  @IsString()
+  @Type(() => String)
   title?: string;
 
   @IsOptional()
