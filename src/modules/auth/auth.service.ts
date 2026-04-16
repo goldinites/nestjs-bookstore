@@ -8,7 +8,7 @@ import {
 import { UserService } from '@/modules/user/user.service';
 import { SignInDto } from '@/modules/auth/dto/sign-in.dto';
 import { User } from '@/modules/user/entities/user.entity';
-import * as argon2 from 'argon2';
+import argon2 from 'argon2';
 import { JwtService } from '@nestjs/jwt';
 import { RegisterDto } from '@/modules/auth/dto/register.dto';
 import { AuthErrors } from '@/modules/auth/enums/errors.enum';
