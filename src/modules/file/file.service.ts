@@ -125,7 +125,9 @@ export class FileService {
 
     if (!existsSync(metadataPath)) return null;
 
-    return JSON.parse(readFileSync(metadataPath, 'utf8')) as FileMetadata;
+    return JSON.parse(
+      readFileSync(metadataPath, { encoding: 'utf8' }),
+    ) as FileMetadata;
   }
 
   saveMetadata(fileId: string, metadata: FileMetadata): void {

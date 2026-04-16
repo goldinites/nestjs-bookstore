@@ -17,7 +17,7 @@ export class MainPageService {
     const [content] = await this.bookService.getBooks({
       field: 'createdAt',
       direction: 'DESC',
-      limit: 10,
+      limit: 12,
     });
 
     return mapBooksToResponse(content);
@@ -27,7 +27,7 @@ export class MainPageService {
     const [content] = await this.categoryService.getCategories({
       field: 'booksCount',
       direction: 'DESC',
-      limit: 10,
+      limit: 6,
     });
 
     return mapCategoriesToResponse(content);
@@ -37,7 +37,7 @@ export class MainPageService {
     const [content] = await this.bookService.getBooks({
       field: 'purchasesCount',
       direction: 'DESC',
-      limit: 10,
+      limit: 12,
     });
 
     return mapBooksToResponse(content);
