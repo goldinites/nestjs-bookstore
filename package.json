@@ -15,8 +15,7 @@
     "lint": "eslint \"src/**/*.ts\" \"test/**/*.ts\"",
     "lint:fix": "eslint \"src/**/*.ts\" \"test/**/*.ts\" --fix",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/data-source.ts",
-    "migration:generate": "npm run typeorm -- migration:generate ./src/migrations/GeneratedMigration",
-    "migration:create": "npm run typeorm -- migration:create ./src/migrations/NewMigration",
+    "migration:generate": "ts-node ./scripts/generate-migration.ts",
     "migration:run": "npm run typeorm -- migration:run",
     "migration:revert": "npm run typeorm -- migration:revert",
     "migration:show": "npm run typeorm -- migration:show"
