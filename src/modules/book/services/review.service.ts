@@ -6,7 +6,7 @@ import { Review } from '@/modules/book/entities/review.entity';
 import { User } from '@/modules/user/entities/user.entity';
 import { Book } from '@/modules/book/entities/book.entity';
 import { UserErrors } from '@/modules/user/enums/errors.enum';
-import { BookErrors } from '@/modules/book/enums/errors.enum';
+import { BookErrors, ReviewErrors } from '@/modules/book/enums/errors.enum';
 
 @Injectable()
 export class ReviewService {
@@ -41,5 +41,15 @@ export class ReviewService {
 
       return await reviewRepository.save(review);
     });
+  }
+
+  async deleteReview(userId: number, bookId: number): Promise<void> {
+    const review = await this.reviewRepository.findOne({
+      where: { user: { id: userId }, book: { id: bookId } },
+    });
+
+    if (!review) throw new NotFoundException(ReviewErrors.NOT_FOUND);
+
+    await this.reviewRepository.remove(review);
   }
 }

@@ -32,6 +32,7 @@ export class UserService {
       order: { [field]: direction },
       take: limit,
       skip: offset,
+      relations: { reviews: Boolean(select?.reviews) },
       select,
     });
   }

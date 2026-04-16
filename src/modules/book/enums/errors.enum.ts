@@ -5,3 +5,7 @@ export enum BookErrors {
   NOT_DELETED = 'Book not deleted',
   IMAGE_REQUIRED = 'Image is required',
 }
+
+export enum ReviewErrors {
+  NOT_FOUND = 'Review not found',
+}

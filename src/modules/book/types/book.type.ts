@@ -1,3 +1,14 @@
+export type ReviewResponse = {
+  id: number;
+  text: string;
+  rating: number;
+  createdAt: Date;
+  user?: {
+    id: number;
+    email: string;
+  };
+};
+
 export type BookResponse = {
   id: number;
   title: string;
@@ -10,6 +21,7 @@ export type BookResponse = {
   stockCount: number;
   rating: number;
   price: number;
+  reviews?: ReviewResponse[];
 };
 
 export type GetBooksResponse = {

@@ -2,11 +2,13 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { Roles } from '@/modules/user/enums/roles.enum';
 import { Exclude } from 'class-transformer';
+import { Review } from '@/modules/book/entities/review.entity';
 
 @Entity()
 export class User {
@@ -21,6 +23,9 @@ export class User {
 
   @Column({ length: 255, unique: true })
   email: string;
+
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[];
 
   @Column({ length: 255 })
   @Exclude()

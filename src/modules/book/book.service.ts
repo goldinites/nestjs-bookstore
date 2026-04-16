@@ -74,13 +74,26 @@ export class BookService {
       order: { [field]: direction },
       take: limit,
       skip: offset,
-      relations: { category: Boolean(select?.category) },
+      relations: {
+        category: Boolean(select?.category),
+        reviews: Boolean(select?.reviews),
+      },
       select,
     });
   }
 
-  async getBookById(id: number): Promise<Book | null> {
-    return await this.bookRepository.findOneBy({ id });
+  async getBookById(
+    id: number,
+    select?: FindOptionsSelect<Book>,
+  ): Promise<Book | null> {
+    return await this.bookRepository.findOne({
+      where: { id },
+      relations: {
+        category: Boolean(select?.category),
+        reviews: Boolean(select?.reviews),
+      },
+      select,
+    });
   }
 
   async createBook(payload: CreateBookDto): Promise<Book> {

@@ -1,7 +1,28 @@
 import { Book } from '@/modules/book/entities/book.entity';
-import { BookResponse } from '@/modules/book/types/book.type';
+import { BookResponse, ReviewResponse } from '@/modules/book/types/book.type';
+import { Review } from '@/modules/book/entities/review.entity';
+
+export function mapReviewToResponse(review: Review): ReviewResponse {
+  const user = review.user
+    ? { id: review.user.id, email: review.user.email }
+    : undefined;
+
+  return {
+    id: review.id,
+    text: review.text,
+    rating: review.rating,
+    createdAt: review.createdAt,
+    user,
+  };
+}
+
+export function mapReviewsToResponse(reviews: Review[]): ReviewResponse[] {
+  return reviews.map(mapReviewToResponse);
+}
 
 export function mapBookToResponse(book: Book): BookResponse {
+  const reviews = book.reviews ? mapReviewsToResponse(book.reviews) : undefined;
+
   return {
     id: book.id,
     title: book.title,
@@ -14,6 +35,7 @@ export function mapBookToResponse(book: Book): BookResponse {
     rating: Number(book.rating),
     price: Number(book.price),
     description: book.description,
+    reviews,
   };
 }
 

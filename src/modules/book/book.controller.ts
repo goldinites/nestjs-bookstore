@@ -39,6 +39,7 @@ import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
 import type { AuthUser } from '@/modules/auth/types/auth-user.type';
 import { AddReviewDto } from '@/modules/book/dto/add-review.dto';
 import { ReviewService } from '@/modules/book/services/review.service';
+import { Review } from '@/modules/book/entities/review.entity';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Permissions(Roles.ADMIN)
@@ -130,11 +131,21 @@ export class BookController {
   }
 
   @Post('review/:id')
+  @Permissions(Roles.USER)
   async addReview(
     @CurrentUser() { userId }: AuthUser,
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: AddReviewDto,
-  ) {
+  ): Promise<Review> {
     return await this.reviewService.addReview(userId, id, payload);
+  }
+
+  @Delete('review/:id')
+  @Permissions(Roles.USER)
+  async deleteReview(
+    @CurrentUser() { userId }: AuthUser,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    return await this.reviewService.deleteReview(userId, id);
   }
 }
