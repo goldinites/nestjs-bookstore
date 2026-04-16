@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
 import { Cart } from '@/modules/cart/entities/cart.entity';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { AddToCartDto } from '@/modules/cart/dto/add-to-cart.dto';
@@ -22,15 +22,19 @@ export class CartService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getCart(userId: number): Promise<Cart | null> {
+  async getCart(
+    userId: number,
+    select?: FindOptionsSelect<Cart>,
+  ): Promise<Cart | null> {
     return await this.cartRepository.findOne({
       where: { user: { id: userId } },
-      relations: { items: true },
+      relations: { user: Boolean(select?.user), items: Boolean(select?.items) },
+      select,
     });
   }
 
   async getCartItemsCount(userId: number): Promise<number> {
-    const cart: Cart | null = await this.getCart(userId);
+    const cart: Cart | null = await this.getCart(userId, { items: true });
 
     if (!cart) throw new NotFoundException(CartErrors.NOT_FOUND);
 

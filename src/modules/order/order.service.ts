@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
 import { Order } from '@/modules/order/entities/order.entity';
 import { Cart } from '@/modules/cart/entities/cart.entity';
 import { CartErrors } from '@/modules/cart/enums/errors.enum';
@@ -28,7 +28,11 @@ export class OrderService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getOrders(userId: number, query?: GetOrderReqDto) {
+  async getOrders(
+    userId: number,
+    query?: GetOrderReqDto,
+    select?: FindOptionsSelect<Order>,
+  ) {
     const { field, direction, limit, offset, ...rest } = {
       ...getOrderDefaultParams,
       ...query,
@@ -39,14 +43,19 @@ export class OrderService {
       order: { [field]: direction },
       take: limit,
       skip: offset,
-      relations: { items: true },
+      relations: { items: Boolean(select?.items) },
+      select,
     });
   }
 
-  async getOrderById(userId: number, id: number): Promise<Order | null> {
+  async getOrderById(
+    userId: number,
+    id: number,
+    select?: FindOptionsSelect<Order>,
+  ): Promise<Order | null> {
     return await this.orderRepository.findOne({
       where: { id, user: { id: userId } },
-      relations: { items: true },
+      relations: { items: Boolean(select?.items) },
     });
   }
 

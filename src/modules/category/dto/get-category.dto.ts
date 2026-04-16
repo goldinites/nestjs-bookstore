@@ -1,7 +1,6 @@
 import { Transform, Type } from 'class-transformer';
 import {
   IsArray,
-  IsBoolean,
   IsIn,
   IsInt,
   IsNumber,
@@ -27,11 +26,6 @@ export class GetCategoryReqDto {
   @Type(() => String)
   @IsArray()
   title?: string;
-
-  @IsOptional()
-  @Type(() => Boolean)
-  @IsBoolean()
-  withBooks?: boolean;
 
   @IsOptional()
   @IsIn(CATEGORY_SORT_FIELDS)

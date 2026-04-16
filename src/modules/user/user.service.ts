@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 import { User } from '@/modules/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserErrors } from '@/modules/user/enums/errors.enum';
@@ -21,7 +21,7 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async getUsers(query?: GetUserReqDto) {
+  async getUsers(query?: GetUserReqDto, select?: FindOptionsSelect<User>) {
     const { field, direction, limit, offset, ...where } = {
       ...getUserDefaultParams,
       ...query,
@@ -32,6 +32,7 @@ export class UserService {
       order: { [field]: direction },
       take: limit,
       skip: offset,
+      select,
     });
   }
 

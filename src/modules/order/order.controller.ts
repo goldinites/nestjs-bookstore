@@ -35,7 +35,9 @@ export class OrderController {
     @CurrentUser() { userId }: AuthUser,
     @Query() query: GetOrderReqDto,
   ): Promise<GetOrdersResponse> {
-    const [content, total] = await this.orderService.getOrders(userId, query);
+    const [content, total] = await this.orderService.getOrders(userId, query, {
+      items: true,
+    });
 
     return { content: mapOrdersToResponse(content), total };
   }
@@ -48,6 +50,7 @@ export class OrderController {
     const order: Order | null = await this.orderService.getOrderById(
       userId,
       orderId,
+      { items: true },
     );
 
     if (!order) throw new NotFoundException(OrderErrors.NOT_FOUND);

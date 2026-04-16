@@ -56,7 +56,7 @@ class CategoryController {
     const [content, total] = await this.categoryService.getCategories(query);
 
     return {
-      content: mapCategoriesToResponse(content, query.withBooks),
+      content: mapCategoriesToResponse(content),
       total,
     };
   }

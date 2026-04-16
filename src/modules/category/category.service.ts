@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { FindOptionsSelect, Repository } from 'typeorm';
 import { Category } from '@/modules/category/entities/category.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateCategoryDto } from '@/modules/category/dto/create-category.dto';
@@ -22,8 +22,11 @@ export class CategoryService {
     private readonly categoryRepository: Repository<Category>,
   ) {}
 
-  async getCategories(query?: GetCategoryReqDto) {
-    const { field, direction, limit, offset, withBooks, ...rest } = {
+  async getCategories(
+    query?: GetCategoryReqDto,
+    select?: FindOptionsSelect<Category>,
+  ) {
+    const { field, direction, limit, offset, ...rest } = {
       ...getCategoryDefaultParams,
       ...query,
     };
@@ -37,7 +40,8 @@ export class CategoryService {
       order: { [field]: direction },
       take: limit,
       skip: offset,
-      relations: { books: withBooks },
+      relations: { books: Boolean(select?.books) },
+      select,
     });
   }
 

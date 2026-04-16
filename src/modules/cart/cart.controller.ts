@@ -32,7 +32,9 @@ export class CartController {
 
   @Get()
   async getCart(@CurrentUser() { userId }: AuthUser): Promise<CartResponse> {
-    const cart: Cart | null = await this.cartService.getCart(userId);
+    const cart: Cart | null = await this.cartService.getCart(userId, {
+      items: true,
+    });
 
     if (!cart) throw new NotFoundException(CartErrors.NOT_FOUND);
 
