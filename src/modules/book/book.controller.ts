@@ -24,10 +24,15 @@ import { JwtAuthGuard } from '@/modules/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '@/modules/auth/guards/roles.guard';
 import { Permissions } from '@/modules/auth/decorators/permissions.decorator';
 import { Roles } from '@/modules/user/enums/roles.enum';
-import { BookResponse, GetBooksResponse } from '@/modules/book/types/book.type';
+import {
+  BookResponse,
+  GetBooksResponse,
+  ReviewResponse,
+} from '@/modules/book/types/book.type';
 import {
   mapBooksToResponse,
   mapBookToResponse,
+  mapReviewToResponse,
 } from '@/modules/book/mappers/book-to-response.mapper';
 import { BookErrors } from '@/modules/book/enums/errors.enum';
 import { FileService } from '@/modules/file/file.service';
@@ -39,7 +44,7 @@ import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
 import type { AuthUser } from '@/modules/auth/types/auth-user.type';
 import { AddReviewDto } from '@/modules/book/dto/add-review.dto';
 import { ReviewService } from '@/modules/book/services/review.service';
-import { Review } from '@/modules/book/entities/review.entity';
+import { DeleteReviewDto } from '@/modules/book/dto/delete-review.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Permissions(Roles.ADMIN)
@@ -55,7 +60,7 @@ export class BookController {
   async getBooks(@Query() query: GetBookReqDto): Promise<GetBooksResponse> {
     const [content, total] = await this.bookService.getBooks(query);
 
-    return { content: mapBooksToResponse(content), total };
+    return { content: content, total };
   }
 
   @Get(':id')
@@ -131,21 +136,24 @@ export class BookController {
   }
 
   @Post('review/:id')
-  @Permissions(Roles.USER)
+  @Permissions(Roles.ADMIN, Roles.USER)
   async addReview(
     @CurrentUser() { userId }: AuthUser,
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: AddReviewDto,
-  ): Promise<Review> {
-    return await this.reviewService.addReview(userId, id, payload);
+  ): Promise<ReviewResponse> {
+    const review = await this.reviewService.addReview(userId, id, payload);
+
+    return mapReviewToResponse(review);
   }
 
   @Delete('review/:id')
-  @Permissions(Roles.USER)
+  @Permissions(Roles.ADMIN, Roles.USER)
   async deleteReview(
     @CurrentUser() { userId }: AuthUser,
     @Param('id', ParseIntPipe) id: number,
+    @Body() { reviewId }: DeleteReviewDto,
   ): Promise<void> {
-    return await this.reviewService.deleteReview(userId, id);
+    return await this.reviewService.deleteReview(userId, id, reviewId);
   }
 }
