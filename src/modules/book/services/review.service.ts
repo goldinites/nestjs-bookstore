@@ -10,6 +10,7 @@ import { User } from '@/modules/user/entities/user.entity';
 import { Book } from '@/modules/book/entities/book.entity';
 import { UserErrors } from '@/modules/user/enums/errors.enum';
 import { BookErrors, ReviewErrors } from '@/modules/book/enums/errors.enum';
+import { UpdateReviewDto } from '@/modules/book/dto/update-review.dto';
 
 @Injectable()
 export class ReviewService {
@@ -40,6 +41,14 @@ export class ReviewService {
 
       if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
 
+      const existingReview = await reviewRepository.findOne({
+        where: { user: { id: userId }, book: { id: bookId } },
+      });
+
+      if (existingReview) {
+        throw new BadRequestException(ReviewErrors.ALREADY_EXISTS);
+      }
+
       const { text, rating } = payload;
 
       const review = reviewRepository.create({
@@ -67,6 +76,35 @@ export class ReviewService {
       if (affected === 0) throw new BadRequestException(BookErrors.NOT_UPDATED);
 
       return result;
+    });
+  }
+
+  async updateReview(
+    userId: number,
+    reviewId: number,
+    payload: UpdateReviewDto,
+  ): Promise<Review> {
+    return await this.dataSource.transaction(async (manager) => {
+      const reviewRepository = manager.getRepository(Review);
+
+      const review = await reviewRepository.findOne({
+        where: { id: reviewId, user: { id: userId } },
+      });
+
+      if (!review) throw new NotFoundException(ReviewErrors.NOT_FOUND);
+
+      const { affected } = await reviewRepository.update(reviewId, payload);
+
+      if (affected === 0)
+        throw new BadRequestException(ReviewErrors.NOT_UPDATED);
+
+      const updated = await reviewRepository.findOne({
+        where: { id: reviewId, user: { id: userId } },
+      });
+
+      if (!updated) throw new NotFoundException(ReviewErrors.NOT_FOUND);
+
+      return updated;
     });
   }
 

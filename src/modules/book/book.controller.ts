@@ -45,6 +45,7 @@ import type { AuthUser } from '@/modules/auth/types/auth-user.type';
 import { AddReviewDto } from '@/modules/book/dto/add-review.dto';
 import { ReviewService } from '@/modules/book/services/review.service';
 import { DeleteReviewDto } from '@/modules/book/dto/delete-review.dto';
+import { UpdateReviewDto } from '@/modules/book/dto/update-review.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Permissions(Roles.ADMIN)
@@ -158,6 +159,17 @@ export class BookController {
     @Body() payload: AddReviewDto,
   ): Promise<ReviewResponse> {
     const review = await this.reviewService.addReview(userId, id, payload);
+
+    return mapReviewToResponse(review);
+  }
+
+  @Patch('review/:id')
+  async updateReview(
+    @CurrentUser() { userId }: AuthUser,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: UpdateReviewDto,
+  ) {
+    const review = await this.reviewService.updateReview(userId, id, payload);
 
     return mapReviewToResponse(review);
   }
