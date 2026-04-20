@@ -11,10 +11,16 @@ import {
 
 export class CreateBookDto {
   @IsString()
+  @Type(() => String)
   title: string;
 
   @IsString()
+  @Type(() => String)
   author: string;
+
+  @IsString()
+  @Type(() => String)
+  genre: string;
 
   @Type(() => Number)
   @IsInt()
@@ -28,12 +34,18 @@ export class CreateBookDto {
   categoryId: number;
 
   @IsString()
+  @Type(() => String)
   language: string;
+
+  @IsString()
+  @Type(() => String)
+  description: string;
 
   @Type(() => Number)
   @IsInt()
+  @IsOptional()
   @Min(0)
-  stockCount: number;
+  stockCount?: number;
 
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
@@ -46,4 +58,9 @@ export class CreateBookDto {
   @IsNumber({ maxDecimalPlaces: 2 })
   @IsPositive()
   price: number;
+
+  @IsString()
+  @IsOptional()
+  @Type(() => String)
+  imageUrl?: string;
 }

@@ -75,7 +75,23 @@ export class BookController {
   }
 
   @Post()
-  async createBook(@Body() payload: CreateBookDto): Promise<BookResponse> {
+  @UseInterceptors(
+    FilesUploadInterceptor(UploadType.IMAGE, {
+      fieldName: 'image',
+      mode: 'single',
+    }),
+  )
+  async createBook(
+    @Body() payload: CreateBookDto,
+    @UploadedFile(RequiredFilePipe())
+    image: Express.Multer.File,
+  ): Promise<BookResponse> {
+    if (image) {
+      this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
+
+      payload.imageUrl = this.fileService.buildPublicUrl(image.filename);
+    }
+
     const book: Book = await this.bookService.createBook(payload);
 
     return mapBookToResponse(book);

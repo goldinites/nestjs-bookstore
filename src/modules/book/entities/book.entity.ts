@@ -29,14 +29,14 @@ export class Book {
   @Column({ length: 255 })
   author: string;
 
-  @Column()
-  publishedYear: number;
-
   @Column({ length: 255 })
   genre: string;
 
   @ManyToOne(() => Category)
   category: Category;
+
+  @Column()
+  publishedYear: number;
 
   @OneToMany(() => Review, (review) => review.book, { cascade: true })
   reviews: Review[];

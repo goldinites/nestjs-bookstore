@@ -22,6 +22,16 @@ export class UpdateBookDto {
   @IsString()
   author?: string;
 
+  @IsString()
+  @IsOptional()
+  @Type(() => String)
+  genre?: string;
+
+  @IsString()
+  @IsOptional()
+  @Type(() => String)
+  description?: string;
+
   @IsOptional()
   @Type(() => Number)
   @IsInt()

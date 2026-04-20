@@ -1,6 +1,7 @@
 import { Book } from '@/modules/book/entities/book.entity';
 import { BookResponse, ReviewResponse } from '@/modules/book/types/book.type';
 import { Review } from '@/modules/book/entities/review.entity';
+import { mapCategoryToResponse } from '@/modules/category/mappers/category-to-response.mapper';
 
 export function mapReviewToResponse(review: Review): ReviewResponse {
   const user = review.user
@@ -22,6 +23,9 @@ export function mapReviewsToResponse(reviews: Review[]): ReviewResponse[] {
 
 export function mapBookToResponse(book: Book): BookResponse {
   const reviews = book.reviews ? mapReviewsToResponse(book.reviews) : undefined;
+  const category = book.category
+    ? mapCategoryToResponse(book.category)
+    : undefined;
 
   return {
     id: book.id,
@@ -36,6 +40,7 @@ export function mapBookToResponse(book: Book): BookResponse {
     price: Number(book.price),
     description: book.description,
     reviews,
+    category,
   };
 }
 
