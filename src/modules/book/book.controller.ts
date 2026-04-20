@@ -109,38 +109,25 @@ export class BookController {
   }
 
   @Patch(':id')
-  async updateBook(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() payload: UpdateBookDto,
-  ): Promise<BookResponse> {
-    const book: Book | null = await this.bookService.updateBook(id, payload);
-
-    if (!book) throw new BadRequestException(BookErrors.NOT_UPDATED);
-
-    return mapBookToResponse(book);
-  }
-
-  @Patch(':id/image')
   @UseInterceptors(
     FilesUploadInterceptor(UploadType.IMAGE, {
       fieldName: 'image',
       mode: 'single',
     }),
   )
-  async updateBookImage(
+  async updateBook(
     @Param('id', ParseIntPipe) id: number,
+    @Body() payload: UpdateBookDto,
     @UploadedFile(RequiredFilePipe())
     image: Express.Multer.File,
   ): Promise<BookResponse> {
-    if (!image) throw new BadRequestException(BookErrors.IMAGE_REQUIRED);
+    if (image) {
+      this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
 
-    this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
+      payload.imageUrl = this.fileService.buildPublicUrl(image.filename);
+    }
 
-    const imageUrl = this.fileService.buildPublicUrl(image.filename);
-
-    const book: Book | null = await this.bookService.updateBook(id, {
-      imageUrl,
-    });
+    const book: Book | null = await this.bookService.updateBook(id, payload);
 
     if (!book) throw new BadRequestException(BookErrors.NOT_UPDATED);
 
@@ -152,7 +139,7 @@ export class BookController {
     return await this.bookService.deleteBook(id);
   }
 
-  @Post('review/:id')
+  @Post(':id/review')
   async addReview(
     @CurrentUser() { userId }: AuthUser,
     @Param('id', ParseIntPipe) id: number,
@@ -163,7 +150,7 @@ export class BookController {
     return mapReviewToResponse(review);
   }
 
-  @Patch('review/:id')
+  @Patch(':id/review')
   async updateReview(
     @CurrentUser() { userId }: AuthUser,
     @Param('id', ParseIntPipe) id: number,
@@ -174,7 +161,7 @@ export class BookController {
     return mapReviewToResponse(review);
   }
 
-  @Delete('review/:id')
+  @Delete(':id/review')
   async deleteReview(
     @CurrentUser() { userId }: AuthUser,
     @Param('id', ParseIntPipe) id: number,

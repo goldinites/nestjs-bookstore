@@ -20,9 +20,13 @@ export function mapCartToResponse(cart: Cart): CartResponse {
   return {
     id: cart.id,
     items,
+    itemsCount: items.reduce(
+      (acc: number, item: CartItemResponse): number => acc + item.quantity,
+      0,
+    ),
     totalPrice: items.reduce(
-      (sum: number, item: CartItemResponse): number =>
-        sum + item.quantity * (item.price ?? 0),
+      (acc: number, item: CartItemResponse): number =>
+        acc + item.quantity * (item.price ?? 0),
       0,
     ),
   };

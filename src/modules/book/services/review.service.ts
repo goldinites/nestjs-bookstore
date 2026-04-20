@@ -11,10 +11,14 @@ import { Book } from '@/modules/book/entities/book.entity';
 import { UserErrors } from '@/modules/user/enums/errors.enum';
 import { BookErrors, ReviewErrors } from '@/modules/book/enums/errors.enum';
 import { UpdateReviewDto } from '@/modules/book/dto/update-review.dto';
+import { InjectDataSource } from '@nestjs/typeorm';
 
 @Injectable()
 export class ReviewService {
-  constructor(private readonly dataSource: DataSource) {}
+  constructor(
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
+  ) {}
 
   private calculateAverageRating(reviews: Review[]): number {
     if (reviews.length === 0) return 0;

@@ -33,17 +33,6 @@ export class CartService {
     });
   }
 
-  async getCartItemsCount(userId: number): Promise<number> {
-    const cart: Cart | null = await this.getCart(userId, { items: true });
-
-    if (!cart) throw new NotFoundException(CartErrors.NOT_FOUND);
-
-    return cart.items.reduce(
-      (acc: number, item: CartItem): number => acc + item.quantity,
-      0,
-    );
-  }
-
   async addItemToCart(
     userId: number,
     payload: AddToCartDto,

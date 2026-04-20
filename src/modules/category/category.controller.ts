@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -35,10 +34,8 @@ import { Roles } from '@/modules/user/enums/roles.enum';
 import { FilesUploadInterceptor } from '@/modules/file/interceptors/file-upload.interceptor';
 import { UploadType } from '@/modules/file/enums/upload-type.enum';
 import { RequiredFilePipe } from '@/modules/file/pipes/required-file.pipe';
-import { BookErrors } from '@/modules/book/enums/errors.enum';
 import { prepareFileMetadata } from '@/modules/file/utils/prepare-metadata.util';
 import { FileService } from '@/modules/file/file.service';
-import { Category } from '@/modules/category/entities/category.entity';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Permissions(Roles.ADMIN)
@@ -73,55 +70,26 @@ class CategoryController {
   }
 
   @Post()
-  async createCategory(
-    @Body() payload: CreateCategoryDto,
-  ): Promise<CategoryResponse> {
-    const category = await this.categoryService.createCategory(payload);
-
-    return mapCategoryToResponse(category);
-  }
-
-  @Patch(':id')
-  async updateCategory(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() payload: UpdateCategoryDto,
-  ): Promise<CategoryResponse> {
-    const category = await this.categoryService.updateCategory(id, payload);
-
-    return mapCategoryToResponse(category);
-  }
-
-  @Patch(':id/image')
   @UseInterceptors(
     FilesUploadInterceptor(UploadType.IMAGE, {
       fieldName: 'image',
       mode: 'single',
     }),
   )
-  async updateBookImage(
-    @Param('id', ParseIntPipe) id: number,
+  async createCategory(
+    @Body() payload: CreateCategoryDto,
     @UploadedFile(RequiredFilePipe())
     image: Express.Multer.File,
   ): Promise<CategoryResponse> {
-    if (!image) throw new BadRequestException(BookErrors.IMAGE_REQUIRED);
+    if (image) {
+      this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
 
-    this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
+      payload.imageUrl = this.fileService.buildPublicUrl(image.filename);
+    }
 
-    const imageUrl = this.fileService.buildPublicUrl(image.filename);
-
-    const category: Category | null = await this.categoryService.updateCategory(
-      id,
-      { imageUrl },
-    );
-
-    if (!category) throw new BadRequestException(BookErrors.NOT_UPDATED);
+    const category = await this.categoryService.createCategory(payload);
 
     return mapCategoryToResponse(category);
-  }
-
-  @Delete(':id')
-  async deleteCategory(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.categoryService.deleteCategory(id);
   }
 
   @Post('import')
@@ -132,6 +100,35 @@ class CategoryController {
     const categories = await this.categoryService.importCategories(payload);
 
     return mapCategoriesToResponse(categories);
+  }
+
+  @Patch(':id')
+  @UseInterceptors(
+    FilesUploadInterceptor(UploadType.IMAGE, {
+      fieldName: 'image',
+      mode: 'single',
+    }),
+  )
+  async updateCategory(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: UpdateCategoryDto,
+    @UploadedFile(RequiredFilePipe())
+    image: Express.Multer.File,
+  ): Promise<CategoryResponse> {
+    if (image) {
+      this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
+
+      payload.imageUrl = this.fileService.buildPublicUrl(image.filename);
+    }
+
+    const category = await this.categoryService.updateCategory(id, payload);
+
+    return mapCategoryToResponse(category);
+  }
+
+  @Delete(':id')
+  async deleteCategory(@Param('id', ParseIntPipe) id: number): Promise<void> {
+    return this.categoryService.deleteCategory(id);
   }
 }
 

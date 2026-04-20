@@ -41,13 +41,6 @@ export class CartController {
     return mapCartToResponse(cart);
   }
 
-  @Get('count')
-  async getCartItemsCount(
-    @CurrentUser() { userId }: AuthUser,
-  ): Promise<number> {
-    return await this.cartService.getCartItemsCount(userId);
-  }
-
   @Post('items')
   async addItemToCart(
     @CurrentUser() { userId }: AuthUser,

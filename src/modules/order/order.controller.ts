@@ -69,7 +69,7 @@ export class OrderController {
     return mapOrderToResponse(order);
   }
 
-  @Patch('complete/:orderId')
+  @Patch(':orderId/complete')
   async completeOrder(
     @CurrentUser() { userId }: AuthUser,
     @Param('orderId', ParseIntPipe) orderId: number,
@@ -79,7 +79,7 @@ export class OrderController {
     return mapOrderToResponse(order);
   }
 
-  @Patch('cancel/:orderId')
+  @Patch(':orderId/cancel')
   async cancelOrder(
     @CurrentUser() { userId }: AuthUser,
     @Param('orderId', ParseIntPipe) orderId: number,
