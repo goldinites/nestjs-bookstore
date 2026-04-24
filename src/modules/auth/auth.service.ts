@@ -56,42 +56,6 @@ export class AuthService {
     }
   }
 
-  private async generateTokens(user: User): Promise<AuthTokens> {
-    const accessPayload: TokenPayload = {
-      sub: user.id,
-      email: user.email,
-      role: user.role,
-    };
-
-    const refreshPayload: RefreshTokenPayload = {
-      sub: user.id,
-    };
-
-    const ttlSeconds: number = parseTtlToSeconds(
-      this.configService.get<string>(
-        'jwt.refresh.expiresIn',
-        DEFAULT_REFRESH_TOKEN_TTL,
-      ),
-    );
-
-    const accessToken: string = await this.jwtService.signAsync(accessPayload);
-    const refreshToken: string = await this.jwtService.signAsync(
-      refreshPayload,
-      {
-        secret: this.configService.get<string>('jwt.refresh.secret'),
-        expiresIn: ttlSeconds,
-      },
-    );
-
-    await this.redisTokenService.setRefreshToken(
-      user.id,
-      refreshToken,
-      ttlSeconds,
-    );
-
-    return { accessToken, refreshToken };
-  }
-
   async signIn(payload: SignInDto): Promise<SignInResponse> {
     const user: User | null = await this.userService.getUserByEmail(
       payload.email,
@@ -139,6 +103,42 @@ export class AuthService {
     await this.redisTokenService.deleteRefreshToken(userId);
 
     return await this.generateTokens(user);
+  }
+
+  private async generateTokens(user: User): Promise<AuthTokens> {
+    const accessPayload: TokenPayload = {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+    };
+
+    const refreshPayload: RefreshTokenPayload = {
+      sub: user.id,
+    };
+
+    const ttlSeconds: number = parseTtlToSeconds(
+      this.configService.get<string>(
+        'jwt.refresh.expiresIn',
+        DEFAULT_REFRESH_TOKEN_TTL,
+      ),
+    );
+
+    const accessToken: string = await this.jwtService.signAsync(accessPayload);
+    const refreshToken: string = await this.jwtService.signAsync(
+      refreshPayload,
+      {
+        secret: this.configService.get<string>('jwt.refresh.secret'),
+        expiresIn: ttlSeconds,
+      },
+    );
+
+    await this.redisTokenService.setRefreshToken(
+      user.id,
+      refreshToken,
+      ttlSeconds,
+    );
+
+    return { accessToken, refreshToken };
   }
 
   async logout(payload: RefreshTokenDto): Promise<void> {

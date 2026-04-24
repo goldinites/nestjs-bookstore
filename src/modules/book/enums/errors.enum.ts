@@ -10,4 +10,6 @@ export enum ReviewErrors {
   NOT_FOUND = 'Review not found',
   NOT_UPDATED = 'Review not updated',
   ALREADY_EXISTS = 'You already reviewed this book',
+  CANNOT_UPDATE = 'Cannot update this review',
+  CANNOT_DELETE = 'You cannot delete this review',
 }

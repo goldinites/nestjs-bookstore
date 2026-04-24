@@ -44,7 +44,6 @@ import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
 import type { AuthUser } from '@/modules/auth/types/auth-user.type';
 import { AddReviewDto } from '@/modules/book/dto/add-review.dto';
 import { ReviewService } from '@/modules/book/services/review.service';
-import { DeleteReviewDto } from '@/modules/book/dto/delete-review.dto';
 import { UpdateReviewDto } from '@/modules/book/dto/update-review.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -61,7 +60,7 @@ export class BookController {
   async getBooks(@Query() query: GetBookReqDto): Promise<GetBooksResponse> {
     const [content, total] = await this.bookService.getBooks(query);
 
-    return { content: content, total };
+    return { content: mapBooksToResponse(content), total };
   }
 
   @Get(':id')
@@ -150,23 +149,26 @@ export class BookController {
     return mapReviewToResponse(review);
   }
 
-  @Patch(':id/review')
+  @Patch(':reviewId/review')
   async updateReview(
     @CurrentUser() { userId }: AuthUser,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('reviewId', ParseIntPipe) reviewId: number,
     @Body() payload: UpdateReviewDto,
-  ) {
-    const review = await this.reviewService.updateReview(userId, id, payload);
+  ): Promise<ReviewResponse> {
+    const review = await this.reviewService.updateReview(
+      userId,
+      reviewId,
+      payload,
+    );
 
     return mapReviewToResponse(review);
   }
 
-  @Delete(':id/review')
+  @Delete(':reviewId/review')
   async deleteReview(
-    @CurrentUser() { userId }: AuthUser,
-    @Param('id', ParseIntPipe) id: number,
-    @Body() { reviewId }: DeleteReviewDto,
+    @CurrentUser() user: AuthUser,
+    @Param('reviewId', ParseIntPipe) reviewId: number,
   ): Promise<void> {
-    return await this.reviewService.deleteReview(userId, id, reviewId);
+    return await this.reviewService.deleteReview(user, reviewId);
   }
 }

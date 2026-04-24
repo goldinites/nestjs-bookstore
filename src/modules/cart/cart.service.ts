@@ -48,15 +48,11 @@ export class CartService {
         const cartRepository = manager.getRepository(Cart);
         const cartItemRepository = manager.getRepository(CartItem);
 
-        const book = await bookRepository.findOne({
-          where: { id: bookId },
-        });
+        const book = await bookRepository.findOneBy({ id: bookId });
 
         if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
 
-        let cart = await cartRepository.findOne({
-          where: { user: { id: userId } },
-        });
+        let cart = await cartRepository.findOneBy({ user: { id: userId } });
 
         if (!cart) {
           cart = cartRepository.create({
@@ -67,31 +63,13 @@ export class CartService {
           cart = await cartRepository.save(cart);
         }
 
-        const existingItem = await cartItemRepository.findOne({
-          where: {
-            cart: { id: cart.id },
-            book: { id: bookId },
-          },
-        });
-
-        if (existingItem) {
-          const nextQuantity = existingItem.quantity + quantity;
-
-          if (nextQuantity > book.stockCount)
-            throw new BadRequestException(CartErrors.QUANTITY_NOT_AVAILABLE);
-
-          existingItem.quantity = nextQuantity;
-
-          return cartItemRepository.save(existingItem);
-        }
-
         if (quantity > book.stockCount)
           throw new BadRequestException(CartErrors.QUANTITY_NOT_AVAILABLE);
 
         const item = cartItemRepository.create({
+          quantity,
           cart,
           book,
-          quantity,
         });
 
         return cartItemRepository.save(item);
@@ -107,34 +85,21 @@ export class CartService {
     if (quantity <= 0) return await this.deleteItemFromCart(userId, bookId);
 
     return this.dataSource.transaction(async (manager) => {
-      const bookRepository = manager.getRepository(Book);
       const cartRepository = manager.getRepository(Cart);
       const cartItemRepository = manager.getRepository(CartItem);
 
-      const cart = await cartRepository.findOne({
-        where: { user: { id: userId } },
-      });
+      const cart = await cartRepository.findOneBy({ user: { id: userId } });
 
       if (!cart) throw new NotFoundException(CartErrors.NOT_FOUND);
 
       const item = await cartItemRepository.findOne({
-        where: {
-          cart: { id: cart.id },
-          book: { id: bookId },
-        },
+        where: { cart: { id: cart.id }, book: { id: bookId } },
+        relations: { book: true },
       });
 
       if (!item) throw new NotFoundException(CartErrors.CART_ITEM_NOT_FOUND);
 
-      const book = await bookRepository.findOne({
-        where: { id: bookId },
-      });
-
-      if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
-
-      const nextQuantity = item.quantity + quantity;
-
-      if (nextQuantity > book.stockCount)
+      if (quantity > item.book.stockCount)
         throw new BadRequestException(CartErrors.QUANTITY_NOT_AVAILABLE);
 
       const { affected } = await cartItemRepository.update(item.id, {
@@ -144,11 +109,9 @@ export class CartService {
       if (affected === 0)
         throw new BadRequestException(CartErrors.CART_ITEM_NOT_UPDATED);
 
-      const updatedItem = await cartItemRepository.findOne({
-        where: {
-          cart: { id: cart.id },
-          book: { id: bookId },
-        },
+      const updatedItem = await cartItemRepository.findOneBy({
+        cart: { id: cart.id },
+        book: { id: bookId },
       });
 
       if (!updatedItem)
@@ -163,17 +126,13 @@ export class CartService {
       const cartRepository = manager.getRepository(Cart);
       const cartItemRepository = manager.getRepository(CartItem);
 
-      const cart = await cartRepository.findOne({
-        where: { user: { id: userId } },
-      });
+      const cart = await cartRepository.findOneBy({ user: { id: userId } });
 
       if (!cart) throw new NotFoundException(CartErrors.NOT_FOUND);
 
-      const item: CartItem | null = await cartItemRepository.findOne({
-        where: {
-          cart: { id: cart.id },
-          book: { id: bookId },
-        },
+      const item: CartItem | null = await cartItemRepository.findOneBy({
+        cart: { id: cart.id },
+        book: { id: bookId },
       });
 
       if (!item) throw new NotFoundException(CartErrors.CART_ITEM_NOT_FOUND);
