@@ -8,7 +8,6 @@ import { Book } from '@/modules/book/entities/book.entity';
 import {
   DataSource,
   EntityManager,
-  FindOptionsSelect,
   FindOptionsWhere,
   ILike,
   In,
@@ -24,9 +23,15 @@ import { Category } from '@/modules/category/entities/category.entity';
 import { CategoryErrors } from '@/modules/category/enums/errors.enum';
 import { BOOKS_COUNT_PROPERTY } from '@/modules/category/constants/category.constants';
 import { ToggleIsActiveBookDto } from '@/modules/book/dto/toggle-is-active-book.dto';
+import { GetBookOptions } from '@/modules/book/types/book.type';
 
 @Injectable()
 export class BookService {
+  private searchFieldsValue: string[] = [
+    'title',
+    'author',
+    'description',
+  ] as const;
   private multiFieldsValue: string[] = ['genre', 'language'] as const;
   private rangeFieldsValue: string[] = ['price', 'publishedYear'] as const;
 
@@ -40,17 +45,13 @@ export class BookService {
   private searchBooks(whereProp: FindOptionsWhere<Book>, searchQuery?: string) {
     const queryValue = searchQuery?.trim();
 
-    if (!queryValue) {
-      return whereProp;
-    }
+    if (!queryValue) return whereProp;
 
     const searchWhere: FindOptionsWhere<Book>[] = [];
 
-    searchWhere.push(
-      { ...whereProp, title: ILike(`%${queryValue}%`) },
-      { ...whereProp, author: ILike(`%${queryValue}%`) },
-      { ...whereProp, description: ILike(`%${queryValue}%`) },
-    );
+    for (const field of this.searchFieldsValue) {
+      searchWhere.push({ ...whereProp, [field]: ILike(`%${queryValue}%`) });
+    }
 
     return searchWhere;
   }
@@ -66,7 +67,7 @@ export class BookService {
     return this.searchBooks(normalizedWhere, q);
   }
 
-  async getBooks(query?: GetBookReqDto, select?: FindOptionsSelect<Book>) {
+  async getBooks(query?: GetBookReqDto, options: GetBookOptions = {}) {
     const { field, direction, limit, offset, ...rest } = {
       ...getBookDefaultParams,
       ...query,
@@ -74,29 +75,27 @@ export class BookService {
 
     const where = this.prepareBooksFindWhere(rest);
 
+    const { select, relations } = options;
+
     return await this.bookRepository.findAndCount({
       where,
       order: { [field]: direction },
       take: limit,
       skip: offset,
-      relations: {
-        category: Boolean(select?.category),
-        reviews: Boolean(select?.reviews),
-      },
+      relations,
       select,
     });
   }
 
   async getBookById(
     id: number,
-    select?: FindOptionsSelect<Book>,
+    options: GetBookOptions = {},
   ): Promise<Book | null> {
+    const { select, relations } = options;
+
     return await this.bookRepository.findOne({
       where: { id },
-      relations: {
-        category: Boolean(select?.category),
-        reviews: Boolean(select?.reviews),
-      },
+      relations,
       select,
     });
   }
@@ -105,6 +104,7 @@ export class BookService {
     return await this.dataSource.transaction(async (manager) => {
       const bookRepository = manager.getRepository(Book);
       const categoryRepository = manager.getRepository(Category);
+
       const { categoryId, ...rest } = payload;
 
       const category = await categoryRepository.findOneBy({ id: categoryId });
@@ -145,20 +145,47 @@ export class BookService {
 
       const { isActive } = payload;
 
-      const { affected } = await bookRepository.update(id, {
-        isActive,
-      });
+      const { affected } = await bookRepository.update(id, { isActive });
 
       if (affected === 0) throw new BadRequestException(BookErrors.NOT_UPDATED);
 
       const updated = await bookRepository.findOne({
         where: { id },
+        relations: { category: true, reviews: { user: true } },
       });
 
       if (!updated) throw new NotFoundException(BookErrors.NOT_FOUND);
 
       return updated;
     });
+  }
+
+  private async setCategoriesBooksCount(
+    manager: EntityManager,
+    payload: CreateBookDto[],
+  ): Promise<void> {
+    if (payload.length === 0) return;
+
+    const booksCountByCategory = payload.reduce((acc, { categoryId }) => {
+      acc.set(categoryId, (acc.get(categoryId) ?? 0) + 1);
+      return acc;
+    }, new Map<number, number>());
+
+    const results = await Promise.all(
+      [...booksCountByCategory.entries()].map(([categoryId, count]) =>
+        manager.increment(
+          Category,
+          { id: categoryId },
+          BOOKS_COUNT_PROPERTY,
+          count,
+        ),
+      ),
+    );
+
+    for (const { affected } of results) {
+      if (affected === 0)
+        throw new BadRequestException(CategoryErrors.NOT_UPDATED);
+    }
   }
 
   async importBooks(payload: CreateBookDto[]): Promise<Book[]> {
@@ -168,9 +195,11 @@ export class BookService {
       const bookRepository = manager.getRepository(Book);
       const categoryRepository = manager.getRepository(Category);
 
-      const categoryIds = [...new Set(payload.map((item) => item.categoryId))];
+      const categoryIds: number[] = [
+        ...new Set(payload.map((item) => item.categoryId)),
+      ];
 
-      const categories = await categoryRepository.find({
+      const categories: Category[] = await categoryRepository.find({
         where: { id: In(categoryIds) },
       });
 
@@ -189,32 +218,13 @@ export class BookService {
         });
       });
 
-      const booksCountByCategory = payload.reduce((acc, { categoryId }) => {
-        acc.set(categoryId, (acc.get(categoryId) ?? 0) + 1);
-        return acc;
-      }, new Map<number, number>());
-
-      const results = await Promise.all(
-        [...booksCountByCategory.entries()].map(([categoryId, count]) =>
-          manager.increment(
-            Category,
-            { id: categoryId },
-            BOOKS_COUNT_PROPERTY,
-            count,
-          ),
-        ),
-      );
-
-      for (const { affected } of results) {
-        if (affected === 0)
-          throw new BadRequestException(CategoryErrors.NOT_UPDATED);
-      }
+      await this.setCategoriesBooksCount(manager, payload);
 
       return await bookRepository.save(books);
     });
   }
 
-  private async updateCategoryBooksCount(
+  private async onUpdateBookCategory(
     manager: EntityManager,
     categoryId?: number,
     previousCategoryId?: number,
@@ -269,7 +279,7 @@ export class BookService {
 
         if (!category) throw new NotFoundException(CategoryErrors.NOT_FOUND);
 
-        await this.updateCategoryBooksCount(
+        await this.onUpdateBookCategory(
           manager,
           categoryId,
           previousCategoryId,

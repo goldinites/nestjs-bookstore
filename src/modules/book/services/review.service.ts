@@ -32,7 +32,10 @@ export class ReviewService {
     );
   }
 
-  private async updateBookRating(manager: EntityManager, bookId: number) {
+  private async updateBookRating(
+    manager: EntityManager,
+    bookId: number,
+  ): Promise<void> {
     const bookRepository = manager.getRepository(Book);
 
     const book = await bookRepository.findOne({
@@ -42,16 +45,18 @@ export class ReviewService {
 
     if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
 
-    const newBookRating = this.calculateAverageRating(book.reviews);
+    const rating: number = this.calculateAverageRating(book.reviews);
 
-    const { affected } = await bookRepository.update(bookId, {
-      rating: newBookRating,
-    });
+    const { affected } = await bookRepository.update(bookId, { rating });
 
     if (affected === 0) throw new BadRequestException(BookErrors.NOT_UPDATED);
   }
 
-  async addReview(userId: number, bookId: number, payload: AddReviewDto) {
+  async addReview(
+    userId: number,
+    bookId: number,
+    payload: AddReviewDto,
+  ): Promise<Review> {
     return await this.dataSource.transaction(async (manager) => {
       const userRepository = manager.getRepository(User);
       const bookRepository = manager.getRepository(Book);

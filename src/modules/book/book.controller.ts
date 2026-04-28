@@ -57,7 +57,9 @@ export class BookController {
 
   @Get()
   async getBooks(@Query() query: GetBookReqDto): Promise<GetBooksResponse> {
-    const [content, total] = await this.bookService.getBooks(query);
+    const [content, total] = await this.bookService.getBooks(query, {
+      relations: { category: true, reviews: { user: true } },
+    });
 
     return { content: mapBooksToResponse(content), total };
   }
@@ -67,8 +69,7 @@ export class BookController {
     @Param('id', ParseIntPipe) id: number,
   ): Promise<BookResponse> {
     const book: Book | null = await this.bookService.getBookById(id, {
-      category: true,
-      reviews: true,
+      relations: { category: true, reviews: { user: true } },
     });
 
     if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);

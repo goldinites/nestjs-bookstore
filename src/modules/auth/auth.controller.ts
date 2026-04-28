@@ -18,6 +18,7 @@ import { SignInResponse } from '@/modules/auth/types/sign-in.type';
 import { RefreshTokenDto } from '@/modules/auth/dto/refresh-token.dto';
 import { AuthTokens } from '@/modules/auth/types/auth-tokens.type';
 import { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
+import { mapUserToResponse } from '@/modules/user/mappers/user-to-response.mapper';
 
 @Controller('auth')
 export class AuthController {
@@ -46,7 +47,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getMe(@CurrentUser() { userId }: AuthUser): Promise<UserResponse> {
-    return await this.authService.getMe(userId);
+    const user = await this.authService.getMe(userId);
+
+    return mapUserToResponse(user);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -55,7 +58,9 @@ export class AuthController {
     @CurrentUser() { userId, role }: AuthUser,
     @Body() payload: UpdateUserDto,
   ): Promise<UserResponse> {
-    return await this.authService.updateMe(userId, role, payload);
+    const user = await this.authService.updateMe(userId, role, payload);
+
+    return mapUserToResponse(user);
   }
 
   @UseGuards(JwtAuthGuard)

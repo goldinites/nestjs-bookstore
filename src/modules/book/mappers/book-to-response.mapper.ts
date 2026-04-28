@@ -2,14 +2,14 @@ import { Book } from '@/modules/book/entities/book.entity';
 import { BookResponse, ReviewResponse } from '@/modules/book/types/book.type';
 import { Review } from '@/modules/book/entities/review.entity';
 import { mapCategoryToResponse } from '@/modules/category/mappers/category-to-response.mapper';
+import { mapUserToResponse } from '@/modules/user/mappers/user-to-response.mapper';
 
 export function mapReviewToResponse(review: Review): ReviewResponse {
-  const user = review.user
-    ? { id: review.user.id, email: review.user.email }
-    : undefined;
+  const user = review.user ? mapUserToResponse(review.user) : undefined;
 
   return {
     id: review.id,
+    isActive: review.isActive,
     text: review.text,
     rating: review.rating,
     createdAt: review.createdAt,
@@ -23,6 +23,10 @@ function filterActiveReviews(reviews: Review[]): Review[] {
 
 export function mapReviewsToResponse(reviews: Review[]): ReviewResponse[] {
   return filterActiveReviews(reviews).map(mapReviewToResponse);
+}
+
+function filterActiveBooks(books: Book[]): Book[] {
+  return books.filter((book) => book.isActive);
 }
 
 export function mapBookToResponse(book: Book): BookResponse {
@@ -49,6 +53,11 @@ export function mapBookToResponse(book: Book): BookResponse {
   };
 }
 
-export function mapBooksToResponse(books: Book[]): BookResponse[] {
+export function mapBooksToResponse(
+  books: Book[],
+  onlyActiveBooks?: boolean,
+): BookResponse[] {
+  if (onlyActiveBooks) books = filterActiveBooks(books);
+
   return books.map(mapBookToResponse);
 }

@@ -15,8 +15,6 @@ import { AuthErrors } from '@/modules/auth/enums/errors.enum';
 import { TokenPayload } from '@/modules/auth/types/token-payload.type';
 import { SignInResponse } from '@/modules/auth/types/sign-in.type';
 import { UserErrors } from '@/modules/user/enums/errors.enum';
-import { UserResponse } from '@/modules/user/types/user.type';
-import { mapUserToResponse } from '@/modules/user/mappers/user-to-response.mapper';
 import { AuthTokens } from '@/modules/auth/types/auth-tokens.type';
 import { RefreshTokenPayload } from '@/modules/auth/types/refresh-token-payload.type';
 import { RedisTokenService } from '@/modules/auth/services/redis-token.service';
@@ -156,19 +154,19 @@ export class AuthService {
     }
   }
 
-  async getMe(id: number): Promise<UserResponse> {
+  async getMe(id: number): Promise<User> {
     const user: User | null = await this.userService.getUserById(id);
 
     if (!user) throw new NotFoundException(UserErrors.NOT_FOUND);
 
-    return mapUserToResponse(user);
+    return user;
   }
 
   async updateMe(
     id: number,
     role: Roles,
     payload: UpdateUserDto,
-  ): Promise<UserResponse> {
+  ): Promise<User> {
     const user: User | null = await this.userService.updateUser(
       id,
       payload,
@@ -177,7 +175,7 @@ export class AuthService {
 
     if (!user) throw new BadRequestException(UserErrors.NOT_UPDATED);
 
-    return mapUserToResponse(user);
+    return user;
   }
 
   async deleteMe(id: number): Promise<void> {
