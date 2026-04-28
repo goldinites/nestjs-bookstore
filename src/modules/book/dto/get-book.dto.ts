@@ -36,16 +36,6 @@ export class GetBookReqDto {
   q?: string;
 
   @IsOptional()
-  @IsString()
-  @Type(() => String)
-  title?: string;
-
-  @IsOptional()
-  @IsString()
-  @Type(() => String)
-  author?: string;
-
-  @IsOptional()
   @Type(() => Number)
   @IsNumber()
   publishedYearFrom?: number;

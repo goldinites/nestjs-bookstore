@@ -89,6 +89,7 @@ export class ReviewService {
 
   async updateReview(
     userId: number,
+    bookId: number,
     reviewId: number,
     payload: UpdateReviewDto,
   ): Promise<Review> {
@@ -96,8 +97,8 @@ export class ReviewService {
       const reviewRepository = manager.getRepository(Review);
 
       const review = await reviewRepository.findOne({
-        where: { id: reviewId },
-        relations: { book: true },
+        where: { id: reviewId, book: { id: bookId } },
+        relations: { user: true },
       });
 
       if (!review) throw new NotFoundException(ReviewErrors.NOT_FOUND);
@@ -110,11 +111,17 @@ export class ReviewService {
       if (affected === 0)
         throw new BadRequestException(ReviewErrors.NOT_UPDATED);
 
-      if (payload.rating !== review.rating) {
-        await this.updateBookRating(manager, review.book.id);
+      if (
+        payload.rating !== undefined &&
+        Number(payload.rating) !== Number(review.rating)
+      ) {
+        await this.updateBookRating(manager, bookId);
       }
 
-      const updated = await reviewRepository.findOneBy({ id: reviewId });
+      const updated = await reviewRepository.findOne({
+        where: { id: reviewId },
+        relations: { user: true },
+      });
 
       if (!updated) throw new NotFoundException(ReviewErrors.NOT_FOUND);
 
@@ -122,13 +129,17 @@ export class ReviewService {
     });
   }
 
-  async deleteReview(user: AuthUser, reviewId: number): Promise<void> {
+  async deleteReview(
+    user: AuthUser,
+    bookId: number,
+    reviewId: number,
+  ): Promise<void> {
     return await this.dataSource.transaction(async (manager) => {
       const reviewRepository = manager.getRepository(Review);
 
       const review = await reviewRepository.findOne({
-        where: { id: reviewId },
-        relations: { user: true, book: true },
+        where: { id: reviewId, book: { id: bookId } },
+        relations: { user: true },
       });
 
       if (!review) throw new NotFoundException(ReviewErrors.NOT_FOUND);
@@ -138,7 +149,7 @@ export class ReviewService {
 
       await reviewRepository.remove(review);
 
-      await this.updateBookRating(manager, review.book.id);
+      await this.updateBookRating(manager, bookId);
     });
   }
 }

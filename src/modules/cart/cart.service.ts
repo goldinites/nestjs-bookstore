@@ -63,6 +63,24 @@ export class CartService {
           cart = await cartRepository.save(cart);
         }
 
+        const existingItem = await cartItemRepository.findOne({
+          where: {
+            cart: { id: cart.id },
+            book: { id: bookId },
+          },
+        });
+
+        if (existingItem) {
+          const nextQuantity = existingItem.quantity + quantity;
+
+          if (nextQuantity > book.stockCount)
+            throw new BadRequestException(CartErrors.QUANTITY_NOT_AVAILABLE);
+
+          existingItem.quantity = nextQuantity;
+
+          return cartItemRepository.save(existingItem);
+        }
+
         if (quantity > book.stockCount)
           throw new BadRequestException(CartErrors.QUANTITY_NOT_AVAILABLE);
 

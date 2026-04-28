@@ -33,7 +33,6 @@ import { Permissions } from '@/modules/auth/decorators/permissions.decorator';
 import { Roles } from '@/modules/user/enums/roles.enum';
 import { FilesUploadInterceptor } from '@/modules/file/interceptors/file-upload.interceptor';
 import { UploadType } from '@/modules/file/enums/upload-type.enum';
-import { RequiredFilePipe } from '@/modules/file/pipes/required-file.pipe';
 import { prepareFileMetadata } from '@/modules/file/utils/prepare-metadata.util';
 import { FileService } from '@/modules/file/file.service';
 
@@ -78,7 +77,7 @@ class CategoryController {
   )
   async createCategory(
     @Body() payload: CreateCategoryDto,
-    @UploadedFile(RequiredFilePipe())
+    @UploadedFile()
     image: Express.Multer.File,
   ): Promise<CategoryResponse> {
     if (image) {
@@ -112,7 +111,7 @@ class CategoryController {
   async updateCategory(
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: UpdateCategoryDto,
-    @UploadedFile(RequiredFilePipe())
+    @UploadedFile()
     image: Express.Multer.File,
   ): Promise<CategoryResponse> {
     if (image) {

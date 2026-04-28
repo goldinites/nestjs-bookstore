@@ -50,13 +50,6 @@ export class CreateBookDto {
 
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  @Min(1)
-  @Max(5)
-  @IsOptional()
-  rating: number;
-
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
   @IsPositive()
   price: number;
 

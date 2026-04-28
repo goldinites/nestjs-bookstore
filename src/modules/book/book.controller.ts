@@ -38,7 +38,6 @@ import { BookErrors } from '@/modules/book/enums/errors.enum';
 import { FileService } from '@/modules/file/file.service';
 import { UploadType } from '@/modules/file/enums/upload-type.enum';
 import { FilesUploadInterceptor } from '@/modules/file/interceptors/file-upload.interceptor';
-import { RequiredFilePipe } from '@/modules/file/pipes/required-file.pipe';
 import { prepareFileMetadata } from '@/modules/file/utils/prepare-metadata.util';
 import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
 import type { AuthUser } from '@/modules/auth/types/auth-user.type';
@@ -46,8 +45,6 @@ import { AddReviewDto } from '@/modules/book/dto/add-review.dto';
 import { ReviewService } from '@/modules/book/services/review.service';
 import { UpdateReviewDto } from '@/modules/book/dto/update-review.dto';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
-@Permissions(Roles.ADMIN)
 @Controller('book')
 export class BookController {
   constructor(
@@ -67,13 +64,18 @@ export class BookController {
   async getBookById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<BookResponse> {
-    const book: Book | null = await this.bookService.getBookById(id);
+    const book: Book | null = await this.bookService.getBookById(id, {
+      category: true,
+      reviews: true,
+    });
 
     if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
 
     return mapBookToResponse(book);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions(Roles.ADMIN)
   @Post()
   @UseInterceptors(
     FilesUploadInterceptor(UploadType.IMAGE, {
@@ -83,20 +85,24 @@ export class BookController {
   )
   async createBook(
     @Body() payload: CreateBookDto,
-    @UploadedFile(RequiredFilePipe())
+    @UploadedFile()
     image: Express.Multer.File,
   ): Promise<BookResponse> {
+    const bookPayload: CreateBookDto = { ...payload };
+
     if (image) {
       this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
 
-      payload.imageUrl = this.fileService.buildPublicUrl(image.filename);
+      bookPayload.imageUrl = this.fileService.buildPublicUrl(image.filename);
     }
 
-    const book: Book = await this.bookService.createBook(payload);
+    const book: Book = await this.bookService.createBook(bookPayload);
 
     return mapBookToResponse(book);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions(Roles.ADMIN)
   @Post('import')
   async importBooks(
     @Body(new ParseArrayPipe({ items: CreateBookDto }))
@@ -107,6 +113,8 @@ export class BookController {
     return mapBooksToResponse(books);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions(Roles.ADMIN)
   @Patch(':id')
   @UseInterceptors(
     FilesUploadInterceptor(UploadType.IMAGE, {
@@ -117,46 +125,57 @@ export class BookController {
   async updateBook(
     @Param('id', ParseIntPipe) id: number,
     @Body() payload: UpdateBookDto,
-    @UploadedFile(RequiredFilePipe())
+    @UploadedFile()
     image: Express.Multer.File,
   ): Promise<BookResponse> {
+    const bookPayload: UpdateBookDto = { ...payload };
+
     if (image) {
       this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
 
-      payload.imageUrl = this.fileService.buildPublicUrl(image.filename);
+      bookPayload.imageUrl = this.fileService.buildPublicUrl(image.filename);
     }
 
-    const book: Book | null = await this.bookService.updateBook(id, payload);
+    const book: Book | null = await this.bookService.updateBook(
+      id,
+      bookPayload,
+    );
 
     if (!book) throw new BadRequestException(BookErrors.NOT_UPDATED);
 
     return mapBookToResponse(book);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions(Roles.ADMIN)
   @Delete(':id')
   async deleteBook(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return await this.bookService.deleteBook(id);
   }
 
-  @Post(':id/review')
+  @UseGuards(JwtAuthGuard)
+  @Post(':bookId/review')
   async addReview(
     @CurrentUser() { userId }: AuthUser,
-    @Param('id', ParseIntPipe) id: number,
+    @Param('bookId', ParseIntPipe) bookId: number,
     @Body() payload: AddReviewDto,
   ): Promise<ReviewResponse> {
-    const review = await this.reviewService.addReview(userId, id, payload);
+    const review = await this.reviewService.addReview(userId, bookId, payload);
 
     return mapReviewToResponse(review);
   }
 
-  @Patch(':reviewId/review')
+  @UseGuards(JwtAuthGuard)
+  @Patch(':bookId/review/:reviewId')
   async updateReview(
     @CurrentUser() { userId }: AuthUser,
+    @Param('bookId', ParseIntPipe) bookId: number,
     @Param('reviewId', ParseIntPipe) reviewId: number,
     @Body() payload: UpdateReviewDto,
   ): Promise<ReviewResponse> {
     const review = await this.reviewService.updateReview(
       userId,
+      bookId,
       reviewId,
       payload,
     );
@@ -164,11 +183,13 @@ export class BookController {
     return mapReviewToResponse(review);
   }
 
-  @Delete(':reviewId/review')
+  @UseGuards(JwtAuthGuard)
+  @Delete(':bookId/review/:reviewId')
   async deleteReview(
     @CurrentUser() user: AuthUser,
+    @Param('bookId', ParseIntPipe) bookId: number,
     @Param('reviewId', ParseIntPipe) reviewId: number,
   ): Promise<void> {
-    return await this.reviewService.deleteReview(user, reviewId);
+    return await this.reviewService.deleteReview(user, bookId, reviewId);
   }
 }

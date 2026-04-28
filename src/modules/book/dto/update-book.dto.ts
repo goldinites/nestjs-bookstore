@@ -58,11 +58,6 @@ export class UpdateBookDto {
   @IsOptional()
   @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
-  rating?: number;
-
-  @IsOptional()
-  @Type(() => Number)
-  @IsNumber({ maxDecimalPlaces: 2 })
   @IsPositive()
   price?: number;
 }

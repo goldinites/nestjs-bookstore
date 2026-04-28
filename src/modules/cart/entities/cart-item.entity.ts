@@ -19,7 +19,7 @@ export class CartItem {
   @ManyToOne(() => Cart, (cart) => cart.items, { onDelete: 'CASCADE' })
   cart: Cart;
 
-  @ManyToOne(() => Book)
+  @ManyToOne(() => Book, { eager: true })
   book: Book;
 
   @Column()

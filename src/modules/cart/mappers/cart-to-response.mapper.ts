@@ -13,7 +13,7 @@ export function mapCartItemToResponse(item: CartItem): CartItemResponse {
         title: item.book.title,
         price: Number(item.book.price),
       }
-    : {};
+    : undefined;
 
   return {
     id: item.id,
