@@ -105,7 +105,7 @@ export class BookController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Permissions(Roles.ADMIN)
-  @Patch(':/bookId/toggle')
+  @Patch(':bookId/toggle')
   async toggleIsActiveBook(
     @Param('bookId', ParseIntPipe) bookId: number,
     @Body() payload: ToggleIsActiveBookDto,
@@ -181,7 +181,7 @@ export class BookController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Permissions(Roles.ADMIN)
-  @Patch(':/bookId/review/:reviewId/toggle')
+  @Patch(':bookId/review/:reviewId/toggle')
   async toggleIsActiveReview(
     @Param('bookId', ParseIntPipe) bookId: number,
     @Param('reviewId', ParseIntPipe) reviewId: number,
