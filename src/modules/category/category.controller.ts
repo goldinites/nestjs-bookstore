@@ -95,7 +95,7 @@ class CategoryController {
     return mapCategoryToResponse(category);
   }
 
-  @Post('import')
+  @Post('categories-import')
   async importCategories(
     @Body(new ParseArrayPipe({ items: CreateCategoryDto }))
     payload: CreateCategoryDto[],

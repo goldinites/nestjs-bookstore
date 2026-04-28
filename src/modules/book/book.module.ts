@@ -7,6 +7,7 @@ import { FileModule } from '@/modules/file/file.module';
 import { CategoryModule } from '@/modules/category/category.module';
 import { Review } from '@/modules/book/entities/review.entity';
 import { ReviewService } from '@/modules/book/services/review.service';
+import { ReviewController } from './controllers/review.controller';
 
 @Module({
   imports: [
@@ -14,7 +15,7 @@ import { ReviewService } from '@/modules/book/services/review.service';
     CategoryModule,
     FileModule,
   ],
-  controllers: [BookController],
+  controllers: [BookController, ReviewController],
   providers: [BookService, ReviewService],
   exports: [BookService],
 })
