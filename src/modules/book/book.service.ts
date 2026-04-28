@@ -126,7 +126,11 @@ export class BookService {
       if (affected === 0)
         throw new BadRequestException(CategoryErrors.NOT_UPDATED);
 
-      return await bookRepository.save(book);
+      const created = await bookRepository.save(book);
+
+      if (!created) throw new BadRequestException(BookErrors.NOT_CREATED);
+
+      return created;
     });
   }
 
@@ -327,7 +331,9 @@ export class BookService {
           throw new BadRequestException(CategoryErrors.NOT_UPDATED);
       }
 
-      await bookRepository.remove(book);
+      const { affected } = await bookRepository.delete(book.id);
+
+      if (affected === 0) throw new BadRequestException(BookErrors.NOT_DELETED);
     });
   }
 }

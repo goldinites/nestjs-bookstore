@@ -31,9 +31,7 @@ export class CartController {
 
   @Get()
   async getCart(@CurrentUser() { userId }: AuthUser): Promise<CartResponse> {
-    const cart: Cart = await this.cartService.getCart(userId, {
-      relations: { items: true },
-    });
+    const cart: Cart = await this.cartService.getOrCreateCart(userId);
 
     return mapCartToResponse(cart);
   }

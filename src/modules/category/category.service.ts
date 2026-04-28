@@ -61,7 +61,12 @@ export class CategoryService {
 
   async createCategory(payload: CreateCategoryDto): Promise<Category> {
     const category = this.categoryRepository.create(payload);
-    return await this.categoryRepository.save(category);
+
+    const created = await this.categoryRepository.save(category);
+
+    if (!created) throw new BadRequestException(CategoryErrors.NOT_CREATED);
+
+    return created;
   }
 
   async importCategories(payload: CreateCategoryDto[]): Promise<Category[]> {
@@ -106,7 +111,10 @@ export class CategoryService {
           CategoryErrors.CANNOT_DELETE_CATEGORY_WITH_BOOKS,
         );
 
-      await categoryRepository.remove(category);
+      const { affected } = await categoryRepository.delete(category.id);
+
+      if (affected === 0)
+        throw new BadRequestException(CategoryErrors.NOT_DELETED);
     });
   }
 }

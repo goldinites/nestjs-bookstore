@@ -1,5 +1,7 @@
 export enum CartErrors {
   NOT_FOUND = 'Cart not found',
+  NOT_CREATED = 'Cart not created',
+  NOT_DELETED = 'Cart not deleted',
   CART_ITEM_NOT_FOUND = 'Cart item not found',
   CART_ITEM_NOT_UPDATED = 'Cart item not updated',
   CART_ITEM_NOT_DELETED = 'Cart item not deleted',

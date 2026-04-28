@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { FindOptionsSelect, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { User } from '@/modules/user/entities/user.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserErrors } from '@/modules/user/enums/errors.enum';
@@ -13,6 +13,7 @@ import { GetUserReqDto } from '@/modules/user/dto/get-user.dto';
 import { getUserDefaultParams } from '@/modules/user/constants/get-user.constants';
 import argon2 from 'argon2';
 import { Roles } from '@/modules/user/enums/roles.enum';
+import { GetUserOptions } from '@/modules/user/types/user.type';
 
 @Injectable()
 export class UserService {
@@ -21,28 +22,48 @@ export class UserService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async getUsers(query?: GetUserReqDto, select?: FindOptionsSelect<User>) {
+  async getUsers(query?: GetUserReqDto, options: GetUserOptions = {}) {
     const { field, direction, limit, offset, ...where } = {
       ...getUserDefaultParams,
       ...query,
     };
+
+    const { select, relations } = options;
 
     return await this.userRepository.findAndCount({
       where,
       order: { [field]: direction },
       take: limit,
       skip: offset,
-      relations: { reviews: Boolean(select?.reviews) },
+      relations,
       select,
     });
   }
 
-  async getUserById(id: number): Promise<User | null> {
-    return await this.userRepository.findOneBy({ id });
+  async getUserById(
+    id: number,
+    options: GetUserOptions = {},
+  ): Promise<User | null> {
+    const { select, relations } = options;
+
+    return await this.userRepository.findOne({
+      where: { id },
+      select,
+      relations,
+    });
   }
 
-  async getUserByEmail(email: string): Promise<User | null> {
-    return await this.userRepository.findOneBy({ email });
+  async getUserByEmail(
+    email: string,
+    options: GetUserOptions = {},
+  ): Promise<User | null> {
+    const { select, relations } = options;
+
+    return await this.userRepository.findOne({
+      where: { email },
+      select,
+      relations,
+    });
   }
 
   async createUser(payload: CreateUserDto): Promise<User> {

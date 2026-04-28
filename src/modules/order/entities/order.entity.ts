@@ -23,7 +23,10 @@ export class Order {
   @JoinColumn()
   user: User;
 
-  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, { cascade: true })
+  @OneToMany(() => OrderItem, (orderItem) => orderItem.order, {
+    eager: true,
+    cascade: true,
+  })
   items: OrderItem[];
 
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.NEW })

@@ -20,7 +20,10 @@ export class CartService {
     private readonly dataSource: DataSource,
   ) {}
 
-  async getCart(userId: number, options: GetCartOptions = {}): Promise<Cart> {
+  async getOrCreateCart(
+    userId: number,
+    options: GetCartOptions = {},
+  ): Promise<Cart> {
     return await this.dataSource.transaction(async (manager) => {
       const cartRepository = manager.getRepository(Cart);
 
@@ -40,6 +43,8 @@ export class CartService {
 
         cart = await cartRepository.save(cart);
       }
+
+      if (!cart) throw new BadRequestException(CartErrors.NOT_CREATED);
 
       return cart;
     });
@@ -166,7 +171,10 @@ export class CartService {
 
       if (!item) throw new NotFoundException(CartErrors.CART_ITEM_NOT_FOUND);
 
-      await cartItemRepository.remove(item);
+      const { affected } = await cartItemRepository.delete(item.id);
+
+      if (affected === 0)
+        throw new BadRequestException(CartErrors.CART_ITEM_NOT_DELETED);
     });
   }
 
@@ -180,7 +188,9 @@ export class CartService {
 
       if (!cart) throw new NotFoundException(CartErrors.NOT_FOUND);
 
-      await cartRepository.remove(cart);
+      const { affected } = await cartRepository.delete(cart.id);
+
+      if (affected === 0) throw new BadRequestException(CartErrors.NOT_DELETED);
     });
   }
 }

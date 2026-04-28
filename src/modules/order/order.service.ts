@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { Order } from '@/modules/order/entities/order.entity';
 import { Cart } from '@/modules/cart/entities/cart.entity';
 import { CartErrors } from '@/modules/cart/enums/errors.enum';
@@ -16,14 +16,17 @@ import { OrderErrors } from '@/modules/order/enums/errors.enum';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { GetOrderReqDto } from '@/modules/order/dto/get-order.dto';
 import { getOrderDefaultParams } from '@/modules/order/constants/get-order.constants';
-import { PURCHASES_COUNT_PROPERTY } from '@/modules/book/constants/book.constants';
+import {
+  PURCHASES_COUNT_PROPERTY,
+  STOCK_COUNT_PROPERTY,
+} from '@/modules/book/constants/book.constants';
+import { GetOrderOptions } from '@/modules/order/types/order.type';
 
 @Injectable()
 export class OrderService {
   constructor(
     @InjectRepository(Order)
     private readonly orderRepository: Repository<Order>,
-
     @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}
@@ -31,19 +34,21 @@ export class OrderService {
   async getOrders(
     userId: number,
     query?: GetOrderReqDto,
-    select?: FindOptionsSelect<Order>,
+    options: GetOrderOptions = {},
   ) {
     const { field, direction, limit, offset, ...rest } = {
       ...getOrderDefaultParams,
       ...query,
     };
 
+    const { select, relations } = options;
+
     return await this.orderRepository.findAndCount({
       where: { user: { id: userId }, ...rest },
       order: { [field]: direction },
       take: limit,
       skip: offset,
-      relations: { items: Boolean(select?.items) },
+      relations,
       select,
     });
   }
@@ -51,11 +56,14 @@ export class OrderService {
   async getOrderById(
     userId: number,
     id: number,
-    select?: FindOptionsSelect<Order>,
+    options: GetOrderOptions = {},
   ): Promise<Order | null> {
+    const { select, relations } = options;
+
     return await this.orderRepository.findOne({
       where: { id, user: { id: userId } },
-      relations: { items: Boolean(select?.items) },
+      relations,
+      select,
     });
   }
 
@@ -68,11 +76,7 @@ export class OrderService {
 
       const cart: Cart | null = await cartRepository.findOne({
         where: { user: { id: userId } },
-        relations: {
-          items: {
-            book: true,
-          },
-        },
+        relations: { items: { book: true } },
       });
 
       if (!cart) throw new NotFoundException(CartErrors.NOT_FOUND);
@@ -119,8 +123,11 @@ export class OrderService {
       await orderItemRepository.save(orderItems);
 
       for (const cartItem of cart.items) {
-        cartItem.book.stockCount -= cartItem.quantity;
-        await bookRepository.save(cartItem.book);
+        await bookRepository.decrement(
+          { id: cartItem.book.id },
+          STOCK_COUNT_PROPERTY,
+          cartItem.quantity,
+        );
       }
 
       await cartRepository.remove(cart);
@@ -148,11 +155,10 @@ export class OrderService {
 
       if (!order) throw new NotFoundException(OrderErrors.NOT_FOUND);
 
-      if (order.status === OrderStatus.COMPLETED) {
-        throw new BadRequestException(OrderErrors.NOT_COMPLETED);
-      }
-
-      if (order.status === OrderStatus.CANCELLED) {
+      if (
+        order.status === OrderStatus.CANCELLED ||
+        order.status === OrderStatus.COMPLETED
+      ) {
         throw new BadRequestException(OrderErrors.NOT_COMPLETED);
       }
 
@@ -196,8 +202,17 @@ export class OrderService {
       }
 
       for (const item of order.items) {
-        item.book.stockCount += item.quantity;
-        await bookRepository.save(item.book);
+        await bookRepository.increment(
+          { id: item.book.id },
+          STOCK_COUNT_PROPERTY,
+          item.quantity,
+        );
+
+        await bookRepository.decrement(
+          { id: item.book.id },
+          PURCHASES_COUNT_PROPERTY,
+          item.quantity,
+        );
       }
 
       await orderItemRepository.remove(order.items);

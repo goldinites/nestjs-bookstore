@@ -3,9 +3,7 @@ import { CategoryResponse } from '@/modules/category/types/category.type';
 import { mapBooksToResponse } from '@/modules/book/mappers/book-to-response.mapper';
 
 export function mapCategoryToResponse(category: Category): CategoryResponse {
-  const books = category.books
-    ? mapBooksToResponse(category?.books ?? [])
-    : undefined;
+  const books = category.books ? mapBooksToResponse(category.books) : undefined;
 
   return {
     id: category.id,

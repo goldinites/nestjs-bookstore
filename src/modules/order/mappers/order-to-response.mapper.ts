@@ -2,18 +2,17 @@ import { OrderItem } from '@/modules/order/entities/order-item.entity';
 import { OrderItemResponse } from '@/modules/order/types/order-item.type';
 import { Order } from '@/modules/order/entities/order.entity';
 import { OrderResponse } from '@/modules/order/types/order.type';
+import { mapBookToResponse } from '@/modules/book/mappers/book-to-response.mapper';
 
 function mapOrderItemToResponse(orderItem: OrderItem): OrderItemResponse {
+  const book = orderItem.book ? mapBookToResponse(orderItem.book) : undefined;
+
   return {
     id: orderItem.id,
     title: orderItem.title,
     price: Number(orderItem.price),
     quantity: orderItem.quantity,
-    imageUrl: orderItem.book.imageUrl,
-    author: orderItem.book.author,
-    publishedYear: orderItem.book.publishedYear,
-    genre: orderItem.book.genre,
-    language: orderItem.book.language,
+    book,
   };
 }
 
