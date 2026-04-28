@@ -3,9 +3,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { FindOptionsSelect, Repository } from 'typeorm';
+import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
 import { Category } from '@/modules/category/entities/category.entity';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { CreateCategoryDto } from '@/modules/category/dto/create-category.dto';
 import { UpdateCategoryDto } from '@/modules/category/dto/update-category.dto';
 import { CategoryErrors } from '@/modules/category/enums/errors.enum';
@@ -20,6 +20,9 @@ export class CategoryService {
   constructor(
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>,
+
+    @InjectDataSource()
+    private readonly dataSource: DataSource,
   ) {}
 
   async getCategories(
@@ -88,15 +91,22 @@ export class CategoryService {
   }
 
   async deleteCategory(id: number): Promise<void> {
-    const category = await this.getCategoryById(id);
+    return await this.dataSource.transaction(async (manager) => {
+      const categoryRepository = manager.getRepository(Category);
 
-    if (!category) throw new NotFoundException(CategoryErrors.NOT_FOUND);
+      const category = await categoryRepository.findOne({
+        where: { id },
+        relations: { books: true },
+      });
 
-    if (category.booksCount > 0)
-      throw new BadRequestException(
-        CategoryErrors.CANNOT_DELETE_CATEGORY_WITH_BOOKS,
-      );
+      if (!category) throw new NotFoundException(CategoryErrors.NOT_FOUND);
 
-    await this.categoryRepository.remove(category);
+      if (category?.books.length)
+        throw new BadRequestException(
+          CategoryErrors.CANNOT_DELETE_CATEGORY_WITH_BOOKS,
+        );
+
+      await categoryRepository.remove(category);
+    });
   }
 }

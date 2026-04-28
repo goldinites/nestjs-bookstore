@@ -12,10 +12,13 @@ import { Category } from '@/modules/category/entities/category.entity';
 import { Review } from '@/modules/book/entities/review.entity';
 
 @Entity()
-@Index(['author', 'genre', 'language', 'createdAt', 'publishedYear'])
+@Index(['title', 'author', 'genre', 'language', 'createdAt', 'publishedYear'])
 export class Book {
   @PrimaryGeneratedColumn()
   id: number;
+
+  @Column({ type: 'bool', default: true })
+  isActive: boolean;
 
   @Column({ length: 255 })
   title: string;
@@ -38,9 +41,6 @@ export class Book {
   @Column()
   publishedYear: number;
 
-  @OneToMany(() => Review, (review) => review.book, { cascade: true })
-  reviews: Review[];
-
   @Column({ length: 255 })
   language: string;
 
@@ -55,6 +55,9 @@ export class Book {
 
   @Column({ type: 'int', default: 0 })
   purchasesCount: number;
+
+  @OneToMany(() => Review, (review) => review.book, { cascade: true })
+  reviews: Review[];
 
   @CreateDateColumn()
   createdAt: Date;

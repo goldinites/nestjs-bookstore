@@ -25,11 +25,29 @@ export class CartService {
   async getCart(
     userId: number,
     select?: FindOptionsSelect<Cart>,
-  ): Promise<Cart | null> {
-    return await this.cartRepository.findOne({
-      where: { user: { id: userId } },
-      relations: { user: Boolean(select?.user), items: Boolean(select?.items) },
-      select,
+  ): Promise<Cart> {
+    return await this.dataSource.transaction(async (manager) => {
+      const cartRepository = manager.getRepository(Cart);
+
+      let cart = await cartRepository.findOne({
+        where: { user: { id: userId } },
+        relations: {
+          user: Boolean(select?.user),
+          items: Boolean(select?.items),
+        },
+        select,
+      });
+
+      if (!cart) {
+        cart = cartRepository.create({
+          user: { id: userId },
+          items: [],
+        });
+
+        cart = await cartRepository.save(cart);
+      }
+
+      return cart;
     });
   }
 

@@ -6,8 +6,8 @@ export class AddReviewDto {
   @Type(() => String)
   text: string;
 
-  @Type(() => Number)
   @IsNumber({ maxDecimalPlaces: 2 })
+  @Type(() => Number)
   @Min(1)
   @Max(5)
   rating: number;

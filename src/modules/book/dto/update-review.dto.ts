@@ -7,9 +7,9 @@ export class UpdateReviewDto {
   @Type(() => String)
   text: string;
 
-  @Type(() => Number)
-  @IsOptional()
   @IsNumber({ maxDecimalPlaces: 2 })
+  @IsOptional()
+  @Type(() => Number)
   @Min(1)
   @Max(5)
   rating: number;

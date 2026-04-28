@@ -25,36 +25,36 @@ export const BOOK_SORT_FIELDS = [
 export type BookSortField = (typeof BOOK_SORT_FIELDS)[number];
 
 export class GetBookReqDto {
-  @IsOptional()
   @IsNumber()
+  @IsOptional()
   @Type(() => Number)
   id?: number;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   @Type(() => String)
   q?: string;
 
+  @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
   publishedYearFrom?: number;
 
+  @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
   publishedYearTo?: number;
 
-  @IsOptional()
-  @Transform(({ value }) => toArray(value)?.map(String))
-  @Type(() => String)
   @IsArray()
+  @IsOptional()
+  @Type(() => String)
+  @Transform(({ value }) => toArray(value)?.map(String))
   genre?: string[];
 
-  @IsOptional()
-  @Transform(({ value }) => toArray(value)?.map(String))
-  @Type(() => String)
   @IsArray()
+  @IsOptional()
+  @Type(() => String)
+  @Transform(({ value }) => toArray(value)?.map(String))
   language?: string[];
 
   @IsOptional()
@@ -64,34 +64,34 @@ export class GetBookReqDto {
   @Max(5)
   rating?: number;
 
+  @IsNumber()
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
   priceFrom?: number;
 
-  @IsOptional()
-  @Type(() => Number)
   @IsNumber()
+  @Type(() => Number)
+  @IsOptional()
   priceTo?: number;
 
-  @IsOptional()
   @IsIn(BOOK_SORT_FIELDS)
+  @IsOptional()
   field?: BookSortField;
 
-  @IsOptional()
   @IsIn(['ASC', 'DESC'])
+  @IsOptional()
   direction?: FindOptionsOrderValue;
 
-  @IsOptional()
-  @Type(() => Number)
   @IsInt()
+  @Type(() => Number)
+  @IsOptional()
   @Min(1)
   @Max(100)
   limit?: number;
 
-  @IsOptional()
-  @Type(() => Number)
   @IsInt()
+  @Type(() => Number)
+  @IsOptional()
   @Min(0)
   offset?: number;
 }

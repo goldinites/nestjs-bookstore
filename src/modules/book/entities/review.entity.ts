@@ -17,6 +17,9 @@ export class Review {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'bool', default: false })
+  isActive: boolean;
+
   @Column({ nullable: true })
   text: string;
 

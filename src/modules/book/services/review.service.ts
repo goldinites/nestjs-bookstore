@@ -14,6 +14,7 @@ import { UpdateReviewDto } from '@/modules/book/dto/update-review.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { AuthUser } from '@/modules/auth/types/auth-user.type';
 import { Roles } from '@/modules/user/enums/roles.enum';
+import { ToggleIsActiveReviewDto } from '@/modules/book/dto/toggle-active-review.dto';
 
 @Injectable()
 export class ReviewService {
@@ -84,6 +85,40 @@ export class ReviewService {
       await this.updateBookRating(manager, bookId);
 
       return result;
+    });
+  }
+
+  async toggleIsActiveReview(
+    bookId: number,
+    reviewId: number,
+    payload: ToggleIsActiveReviewDto,
+  ): Promise<Review> {
+    return await this.dataSource.transaction(async (manager) => {
+      const reviewRepository = manager.getRepository(Review);
+
+      const review = await reviewRepository.findOne({
+        where: { id: reviewId, book: { id: bookId } },
+      });
+
+      if (!review) throw new NotFoundException(ReviewErrors.NOT_FOUND);
+
+      const { isActive } = payload;
+
+      const { affected } = await reviewRepository.update(reviewId, {
+        isActive,
+      });
+
+      if (affected === 0)
+        throw new BadRequestException(ReviewErrors.NOT_UPDATED);
+
+      const updated = await reviewRepository.findOne({
+        where: { id: reviewId },
+        relations: { user: true },
+      });
+
+      if (!updated) throw new NotFoundException(ReviewErrors.NOT_FOUND);
+
+      return updated;
     });
   }
 

@@ -15,7 +15,7 @@ import {
   Repository,
 } from 'typeorm';
 import { GetBookReqDto } from '@/modules/book/dto/get-book.dto';
-import { getBookDefaultParams } from '@/modules/book/constants/get-book.constants';
+import { getBookDefaultParams } from '@/modules/book/constants/book.constants';
 import { BookErrors } from '@/modules/book/enums/errors.enum';
 import { CreateBookDto } from '@/modules/book/dto/create-book.dto';
 import { UpdateBookDto } from '@/modules/book/dto/update-book.dto';
@@ -32,7 +32,6 @@ export class BookService {
   constructor(
     @InjectRepository(Book)
     private readonly bookRepository: Repository<Book>,
-
     @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}

@@ -80,13 +80,17 @@ class CategoryController {
     @UploadedFile()
     image: Express.Multer.File,
   ): Promise<CategoryResponse> {
+    const categoryPayload: CreateCategoryDto = { ...payload };
+
     if (image) {
       this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
 
-      payload.imageUrl = this.fileService.buildPublicUrl(image.filename);
+      categoryPayload.imageUrl = this.fileService.buildPublicUrl(
+        image.filename,
+      );
     }
 
-    const category = await this.categoryService.createCategory(payload);
+    const category = await this.categoryService.createCategory(categoryPayload);
 
     return mapCategoryToResponse(category);
   }
@@ -114,13 +118,19 @@ class CategoryController {
     @UploadedFile()
     image: Express.Multer.File,
   ): Promise<CategoryResponse> {
+    const categoryPayload: UpdateCategoryDto = { ...payload };
     if (image) {
       this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
 
-      payload.imageUrl = this.fileService.buildPublicUrl(image.filename);
+      categoryPayload.imageUrl = this.fileService.buildPublicUrl(
+        image.filename,
+      );
     }
 
-    const category = await this.categoryService.updateCategory(id, payload);
+    const category = await this.categoryService.updateCategory(
+      id,
+      categoryPayload,
+    );
 
     return mapCategoryToResponse(category);
   }

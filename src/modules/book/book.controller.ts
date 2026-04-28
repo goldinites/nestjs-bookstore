@@ -44,6 +44,7 @@ import type { AuthUser } from '@/modules/auth/types/auth-user.type';
 import { AddReviewDto } from '@/modules/book/dto/add-review.dto';
 import { ReviewService } from '@/modules/book/services/review.service';
 import { UpdateReviewDto } from '@/modules/book/dto/update-review.dto';
+import { ToggleIsActiveReviewDto } from '@/modules/book/dto/toggle-active-review.dto';
 
 @Controller('book')
 export class BookController {
@@ -161,6 +162,23 @@ export class BookController {
     @Body() payload: AddReviewDto,
   ): Promise<ReviewResponse> {
     const review = await this.reviewService.addReview(userId, bookId, payload);
+
+    return mapReviewToResponse(review);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions(Roles.ADMIN)
+  @Patch(':/bookId/review/:reviewId/toggle')
+  async toggleIsActiveReview(
+    @Param('bookId', ParseIntPipe) bookId: number,
+    @Param('reviewId', ParseIntPipe) reviewId: number,
+    @Body() payload: ToggleIsActiveReviewDto,
+  ): Promise<ReviewResponse> {
+    const review = await this.reviewService.toggleIsActiveReview(
+      bookId,
+      reviewId,
+      payload,
+    );
 
     return mapReviewToResponse(review);
   }

@@ -17,8 +17,12 @@ export function mapReviewToResponse(review: Review): ReviewResponse {
   };
 }
 
+function filterActiveReviews(reviews: Review[]): Review[] {
+  return reviews.filter((review) => review.isActive);
+}
+
 export function mapReviewsToResponse(reviews: Review[]): ReviewResponse[] {
-  return reviews.map(mapReviewToResponse);
+  return filterActiveReviews(reviews).map(mapReviewToResponse);
 }
 
 export function mapBookToResponse(book: Book): BookResponse {
@@ -29,6 +33,7 @@ export function mapBookToResponse(book: Book): BookResponse {
 
   return {
     id: book.id,
+    isActive: book.isActive,
     title: book.title,
     author: book.author,
     language: book.language,

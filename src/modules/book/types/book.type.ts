@@ -13,6 +13,7 @@ export type ReviewResponse = {
 
 export type BookResponse = {
   id: number;
+  isActive: boolean;
   title: string;
   description: string;
   imageUrl: string;

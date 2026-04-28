@@ -7,19 +7,33 @@ import {
   IsString,
   Min,
   Max,
+  IsBoolean,
 } from 'class-validator';
 
 export class UpdateBookDto {
+  @IsBoolean()
   @IsOptional()
+  @Type(() => Boolean)
+  isActive?: boolean;
+
   @IsString()
+  @IsOptional()
+  @Type(() => String)
   title?: string;
+
+  @IsString()
+  @IsOptional()
+  @Type(() => String)
+  description?: string;
 
   @IsOptional()
   @IsString()
+  @Type(() => String)
   imageUrl?: string;
 
   @IsOptional()
   @IsString()
+  @Type(() => String)
   author?: string;
 
   @IsString()
@@ -27,10 +41,11 @@ export class UpdateBookDto {
   @Type(() => String)
   genre?: string;
 
-  @IsString()
   @IsOptional()
-  @Type(() => String)
-  description?: string;
+  @Type(() => Number)
+  @IsInt()
+  @IsPositive()
+  categoryId?: number;
 
   @IsOptional()
   @Type(() => Number)
@@ -40,13 +55,8 @@ export class UpdateBookDto {
   publishedYear?: number;
 
   @IsOptional()
-  @Type(() => Number)
-  @IsInt()
-  @IsPositive()
-  categoryId?: number;
-
-  @IsOptional()
   @IsString()
+  @Type(() => String)
   language?: string;
 
   @IsOptional()

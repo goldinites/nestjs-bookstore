@@ -12,7 +12,7 @@ import { User } from '@/modules/user/entities/user.entity';
 import { CartItem } from '@/modules/cart/entities/cart-item.entity';
 
 @Entity()
-@Index(['user'])
+@Index(['user'], { unique: true })
 export class Cart {
   @PrimaryGeneratedColumn()
   id: number;
