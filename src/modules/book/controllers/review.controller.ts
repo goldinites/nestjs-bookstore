@@ -16,7 +16,7 @@ import { ReviewResponse } from '@/modules/book/types/book.type';
 import { mapReviewToResponse } from '@/modules/book/mappers/book-to-response.mapper';
 import { RolesGuard } from '@/modules/auth/guards/roles.guard';
 import { Roles } from '@/modules/user/enums/roles.enum';
-import { ToggleIsActiveReviewDto } from '@/modules/book/dto/toggle-is-active-review.dto';
+import { ActivationReviewDto } from '@/modules/book/dto/activation-review.dto';
 import { UpdateReviewDto } from '@/modules/book/dto/update-review.dto';
 import { ReviewService } from '@/modules/book/services/review.service';
 import { Permissions } from '@/modules/auth/decorators/permissions.decorator';
@@ -55,13 +55,13 @@ export class ReviewController {
   }
 
   @Permissions(Roles.ADMIN)
-  @Patch(':bookId/review/:reviewId/status')
-  async toggleIsActiveReview(
+  @Patch(':bookId/review/:reviewId/activation')
+  async activationReview(
     @Param('bookId', ParseIntPipe) bookId: number,
     @Param('reviewId', ParseIntPipe) reviewId: number,
-    @Body() payload: ToggleIsActiveReviewDto,
+    @Body() payload: ActivationReviewDto,
   ): Promise<ReviewResponse> {
-    const review = await this.reviewService.toggleIsActiveReview(
+    const review = await this.reviewService.activationReview(
       bookId,
       reviewId,
       payload,

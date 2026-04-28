@@ -35,7 +35,7 @@ import { UploadType } from '@/modules/file/enums/upload-type.enum';
 import { FilesUploadInterceptor } from '@/modules/file/interceptors/file-upload.interceptor';
 import { prepareFileMetadata } from '@/modules/file/utils/prepare-metadata.util';
 import { ReviewService } from '@/modules/book/services/review.service';
-import { ToggleIsActiveBookDto } from '@/modules/book/dto/toggle-is-active-book.dto';
+import { ActivationBookDto } from '@/modules/book/dto/activation-book.dto';
 
 @Controller('book')
 export class BookController {
@@ -141,12 +141,12 @@ export class BookController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Permissions(Roles.ADMIN)
-  @Patch(':id/status')
-  async toggleIsActiveBook(
+  @Patch(':id/activation')
+  async activationBook(
     @Param('id', ParseIntPipe) id: number,
-    @Body() payload: ToggleIsActiveBookDto,
+    @Body() payload: ActivationBookDto,
   ): Promise<BookResponse> {
-    const book = await this.bookService.toggleIsActiveBook(id, payload);
+    const book = await this.bookService.activationBook(id, payload);
 
     return mapBookToResponse(book);
   }

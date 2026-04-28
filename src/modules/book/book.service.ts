@@ -22,7 +22,7 @@ import { normalizeQuery } from '@/modules/utils/query/normalize-query';
 import { Category } from '@/modules/category/entities/category.entity';
 import { CategoryErrors } from '@/modules/category/enums/errors.enum';
 import { BOOKS_COUNT_PROPERTY } from '@/modules/category/constants/category.constants';
-import { ToggleIsActiveBookDto } from '@/modules/book/dto/toggle-is-active-book.dto';
+import { ActivationBookDto } from '@/modules/book/dto/activation-book.dto';
 import { GetBookOptions } from '@/modules/book/types/book.type';
 
 @Injectable()
@@ -134,10 +134,7 @@ export class BookService {
     });
   }
 
-  async toggleIsActiveBook(
-    id: number,
-    payload: ToggleIsActiveBookDto,
-  ): Promise<Book> {
+  async activationBook(id: number, payload: ActivationBookDto): Promise<Book> {
     return await this.dataSource.transaction(async (manager) => {
       const bookRepository = manager.getRepository(Book);
 

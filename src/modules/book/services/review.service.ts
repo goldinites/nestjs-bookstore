@@ -14,7 +14,7 @@ import { UpdateReviewDto } from '@/modules/book/dto/update-review.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { AuthUser } from '@/modules/auth/types/auth-user.type';
 import { Roles } from '@/modules/user/enums/roles.enum';
-import { ToggleIsActiveReviewDto } from '@/modules/book/dto/toggle-is-active-review.dto';
+import { ActivationReviewDto } from '@/modules/book/dto/activation-review.dto';
 
 @Injectable()
 export class ReviewService {
@@ -93,10 +93,10 @@ export class ReviewService {
     });
   }
 
-  async toggleIsActiveReview(
+  async activationReview(
     bookId: number,
     reviewId: number,
-    payload: ToggleIsActiveReviewDto,
+    payload: ActivationReviewDto,
   ): Promise<Review> {
     return await this.dataSource.transaction(async (manager) => {
       const reviewRepository = manager.getRepository(Review);
