@@ -3,38 +3,32 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { DataSource, FindOptionsSelect, Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { Cart } from '@/modules/cart/entities/cart.entity';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource } from '@nestjs/typeorm';
 import { AddToCartDto } from '@/modules/cart/dto/add-to-cart.dto';
 import { CartItem } from '@/modules/cart/entities/cart-item.entity';
 import { CartErrors } from '@/modules/cart/enums/errors.enum';
 import { Book } from '@/modules/book/entities/book.entity';
 import { BookErrors } from '@/modules/book/enums/errors.enum';
+import { GetCartOptions } from '@/modules/cart/types/cart.type';
 
 @Injectable()
 export class CartService {
   constructor(
-    @InjectRepository(Cart)
-    private readonly cartRepository: Repository<Cart>,
-
     @InjectDataSource()
     private readonly dataSource: DataSource,
   ) {}
 
-  async getCart(
-    userId: number,
-    select?: FindOptionsSelect<Cart>,
-  ): Promise<Cart> {
+  async getCart(userId: number, options: GetCartOptions = {}): Promise<Cart> {
     return await this.dataSource.transaction(async (manager) => {
       const cartRepository = manager.getRepository(Cart);
 
+      const { select, relations } = options;
+
       let cart = await cartRepository.findOne({
         where: { user: { id: userId } },
-        relations: {
-          user: Boolean(select?.user),
-          items: Boolean(select?.items),
-        },
+        relations,
         select,
       });
 
@@ -130,7 +124,6 @@ export class CartService {
 
       const item = await cartItemRepository.findOne({
         where: { cart: { id: cart.id }, book: { id: bookId } },
-        relations: { book: true },
       });
 
       if (!item) throw new NotFoundException(CartErrors.CART_ITEM_NOT_FOUND);
@@ -178,10 +171,16 @@ export class CartService {
   }
 
   async deleteCart(userId: number): Promise<void> {
-    const cart: Cart | null = await this.getCart(userId);
+    return this.dataSource.transaction(async (manager) => {
+      const cartRepository = manager.getRepository(Cart);
 
-    if (!cart) throw new NotFoundException(CartErrors.NOT_FOUND);
+      const cart = await cartRepository.findOneBy({
+        user: { id: userId },
+      });
 
-    await this.cartRepository.remove(cart);
+      if (!cart) throw new NotFoundException(CartErrors.NOT_FOUND);
+
+      await cartRepository.remove(cart);
+    });
   }
 }

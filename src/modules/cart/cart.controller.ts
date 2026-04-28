@@ -3,7 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  NotFoundException,
   Param,
   ParseIntPipe,
   Patch,
@@ -15,7 +14,6 @@ import { CurrentUser } from '@/modules/auth/decorators/current-user.decorator';
 import type { AuthUser } from '@/modules/auth/types/auth-user.type';
 import { CartService } from '@/modules/cart/cart.service';
 import { Cart } from '@/modules/cart/entities/cart.entity';
-import { CartErrors } from '@/modules/cart/enums/errors.enum';
 import { AddToCartDto } from '@/modules/cart/dto/add-to-cart.dto';
 import {
   mapCartItemToResponse,
@@ -24,6 +22,7 @@ import {
 import { CartResponse } from '@/modules/cart/types/cart.type';
 import { CartItemResponse } from '@/modules/cart/types/cart-item.type';
 import { CartItem } from '@/modules/cart/entities/cart-item.entity';
+import { UpdateItemQuantityDto } from '@/modules/cart/dto/update-item-quantity.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('cart')
@@ -33,10 +32,8 @@ export class CartController {
   @Get()
   async getCart(@CurrentUser() { userId }: AuthUser): Promise<CartResponse> {
     const cart: Cart = await this.cartService.getCart(userId, {
-      items: true,
+      relations: { items: true },
     });
-
-    if (!cart) throw new NotFoundException(CartErrors.NOT_FOUND);
 
     return mapCartToResponse(cart);
   }
@@ -58,7 +55,7 @@ export class CartController {
   async updateItemQuantity(
     @CurrentUser() { userId }: AuthUser,
     @Param('bookId', ParseIntPipe) bookId: number,
-    @Body('quantity', ParseIntPipe) quantity: number,
+    @Body() { quantity }: UpdateItemQuantityDto,
   ): Promise<CartItemResponse | void> {
     const item: CartItem | void = await this.cartService.updateItemQuantity(
       userId,

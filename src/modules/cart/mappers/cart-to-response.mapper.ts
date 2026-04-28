@@ -4,21 +4,15 @@ import { CartItemResponse } from '@/modules/cart/types/cart-item.type';
 import { CartResponse } from '@/modules/cart/types/cart.type';
 import { mapUserToResponse } from '@/modules/user/mappers/user-to-response.mapper';
 import { UserResponse } from '@/modules/user/types/user.type';
+import { mapBookToResponse } from '@/modules/book/mappers/book-to-response.mapper';
 
 export function mapCartItemToResponse(item: CartItem): CartItemResponse {
-  const bookData = item.book
-    ? {
-        bookId: item.book.id,
-        imageUrl: item.book.imageUrl,
-        title: item.book.title,
-        price: Number(item.book.price),
-      }
-    : undefined;
+  const book = item.book ? mapBookToResponse(item.book) : undefined;
 
   return {
     id: item.id,
     quantity: item.quantity,
-    ...bookData,
+    book,
   };
 }
 
@@ -32,7 +26,7 @@ function calcItemsCount(items: CartItemResponse[]): number {
 function calcTotalPrice(items: CartItemResponse[]): number {
   return items.reduce(
     (acc: number, item: CartItemResponse): number =>
-      acc + (item.quantity ?? 0) * (item.price ?? 0),
+      acc + (item.quantity ?? 0) * (item.book?.price ?? 0),
     0,
   );
 }
