@@ -14,7 +14,7 @@ import { UpdateReviewDto } from '@/modules/book/dto/update-review.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { AuthUser } from '@/modules/auth/types/auth-user.type';
 import { Roles } from '@/modules/user/enums/roles.enum';
-import { ToggleIsActiveReviewDto } from '@/modules/book/dto/toggle-active-review.dto';
+import { ToggleIsActiveReviewDto } from '@/modules/book/dto/toggle-is-active-review.dto';
 
 @Injectable()
 export class ReviewService {

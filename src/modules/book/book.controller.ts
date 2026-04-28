@@ -44,7 +44,8 @@ import type { AuthUser } from '@/modules/auth/types/auth-user.type';
 import { AddReviewDto } from '@/modules/book/dto/add-review.dto';
 import { ReviewService } from '@/modules/book/services/review.service';
 import { UpdateReviewDto } from '@/modules/book/dto/update-review.dto';
-import { ToggleIsActiveReviewDto } from '@/modules/book/dto/toggle-active-review.dto';
+import { ToggleIsActiveReviewDto } from '@/modules/book/dto/toggle-is-active-review.dto';
+import { ToggleIsActiveBookDto } from '@/modules/book/dto/toggle-is-active-book.dto';
 
 @Controller('book')
 export class BookController {
@@ -98,6 +99,18 @@ export class BookController {
     }
 
     const book: Book = await this.bookService.createBook(bookPayload);
+
+    return mapBookToResponse(book);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Permissions(Roles.ADMIN)
+  @Patch(':/bookId/toggle')
+  async toggleIsActiveBook(
+    @Param('bookId', ParseIntPipe) bookId: number,
+    @Body() payload: ToggleIsActiveBookDto,
+  ): Promise<BookResponse> {
+    const book = await this.bookService.toggleIsActiveBook(bookId, payload);
 
     return mapBookToResponse(book);
   }

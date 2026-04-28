@@ -15,13 +15,20 @@ export class RedisTokenService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit(): Promise<void> {
     this.client = createClient({
       url: this.configService.get<string>('REDIS_URL'),
+      socket: {
+        connectTimeout: 5000,
+      },
     });
+
+    Logger.log('Connecting to Redis...', 'RedisTokenService');
 
     this.client.on('error', (error) => {
       Logger.error(`Redis error: ${error}`, 'RedisTokenService');
     });
 
     await this.client.connect();
+
+    Logger.log('Connected to Redis', 'RedisTokenService');
   }
 
   async onModuleDestroy(): Promise<void> {

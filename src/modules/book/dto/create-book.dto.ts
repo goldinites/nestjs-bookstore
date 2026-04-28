@@ -7,15 +7,9 @@ import {
   Min,
   Max,
   IsOptional,
-  IsBoolean,
 } from 'class-validator';
 
 export class CreateBookDto {
-  @IsBoolean()
-  @IsOptional()
-  @Type(() => Boolean)
-  isActive?: boolean;
-
   @IsString()
   @Type(() => String)
   title: string;

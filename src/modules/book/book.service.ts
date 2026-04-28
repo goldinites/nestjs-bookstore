@@ -23,6 +23,7 @@ import { normalizeQuery } from '@/modules/utils/query/normalize-query';
 import { Category } from '@/modules/category/entities/category.entity';
 import { CategoryErrors } from '@/modules/category/enums/errors.enum';
 import { BOOKS_COUNT_PROPERTY } from '@/modules/category/constants/category.constants';
+import { ToggleIsActiveBookDto } from '@/modules/book/dto/toggle-is-active-book.dto';
 
 @Injectable()
 export class BookService {
@@ -126,6 +127,37 @@ export class BookService {
         throw new BadRequestException(CategoryErrors.NOT_UPDATED);
 
       return await bookRepository.save(book);
+    });
+  }
+
+  async toggleIsActiveBook(
+    id: number,
+    payload: ToggleIsActiveBookDto,
+  ): Promise<Book> {
+    return await this.dataSource.transaction(async (manager) => {
+      const bookRepository = manager.getRepository(Book);
+
+      const book: Book | null = await bookRepository.findOne({
+        where: { id },
+      });
+
+      if (!book) throw new NotFoundException(BookErrors.NOT_FOUND);
+
+      const { isActive } = payload;
+
+      const { affected } = await bookRepository.update(id, {
+        isActive,
+      });
+
+      if (affected === 0) throw new BadRequestException(BookErrors.NOT_UPDATED);
+
+      const updated = await bookRepository.findOne({
+        where: { id },
+      });
+
+      if (!updated) throw new NotFoundException(BookErrors.NOT_FOUND);
+
+      return updated;
     });
   }
 
