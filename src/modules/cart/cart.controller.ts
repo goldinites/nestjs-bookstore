@@ -3,8 +3,6 @@ import {
   Controller,
   Delete,
   Get,
-  Param,
-  ParseIntPipe,
   Patch,
   Post,
   UseGuards,
@@ -23,6 +21,7 @@ import { CartResponse } from '@/modules/cart/types/cart.type';
 import { CartItemResponse } from '@/modules/cart/types/cart-item.type';
 import { CartItem } from '@/modules/cart/entities/cart-item.entity';
 import { UpdateItemQuantityDto } from '@/modules/cart/dto/update-item-quantity.dto';
+import { DeleteItemDto } from '@/modules/cart/dto/delete-item.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('cart')
@@ -34,6 +33,11 @@ export class CartController {
     const cart: Cart = await this.cartService.getOrCreateCart(userId);
 
     return mapCartToResponse(cart);
+  }
+
+  @Delete()
+  async deleteCart(@CurrentUser() { userId }: AuthUser): Promise<void> {
+    return await this.cartService.deleteCart(userId);
   }
 
   @Post('items')
@@ -49,11 +53,10 @@ export class CartController {
     return mapCartItemToResponse(item);
   }
 
-  @Patch('items/:bookId')
+  @Patch('items')
   async updateItemQuantity(
     @CurrentUser() { userId }: AuthUser,
-    @Param('bookId', ParseIntPipe) bookId: number,
-    @Body() { quantity }: UpdateItemQuantityDto,
+    @Body() { bookId, quantity }: UpdateItemQuantityDto,
   ): Promise<CartItemResponse | void> {
     const item: CartItem | void = await this.cartService.updateItemQuantity(
       userId,
@@ -66,16 +69,11 @@ export class CartController {
     return mapCartItemToResponse(item);
   }
 
-  @Delete('items/:bookId')
+  @Delete('items')
   async deleteItemFromCart(
     @CurrentUser() { userId }: AuthUser,
-    @Param('bookId', ParseIntPipe) bookId: number,
+    @Body() { bookId }: DeleteItemDto,
   ): Promise<void> {
     return await this.cartService.deleteItemFromCart(userId, bookId);
-  }
-
-  @Delete()
-  async deleteCart(@CurrentUser() { userId }: AuthUser): Promise<void> {
-    return await this.cartService.deleteCart(userId);
   }
 }
