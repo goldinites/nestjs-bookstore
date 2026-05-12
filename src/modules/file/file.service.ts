@@ -82,16 +82,10 @@ export class FileService {
       }),
       fileFilter: (_req, file, callback) => {
         if (
-          type === UploadType.IMAGE &&
-          !IMAGE_UPLOAD_MIME_TYPES.test(file.mimetype)
-        ) {
-          callback(new Error(FileErrors.NOT_AVAILABLE_TYPE), false);
-          return;
-        }
-
-        if (
-          type === UploadType.FILE &&
-          !DOCUMENT_UPLOAD_MIME_TYPES.test(file.mimetype)
+          (type === UploadType.IMAGE &&
+            !IMAGE_UPLOAD_MIME_TYPES.test(file.mimetype)) ||
+          (type === UploadType.FILE &&
+            !DOCUMENT_UPLOAD_MIME_TYPES.test(file.mimetype))
         ) {
           callback(new Error(FileErrors.NOT_AVAILABLE_TYPE), false);
           return;
