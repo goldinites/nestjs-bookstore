@@ -61,20 +61,12 @@ export class FileService {
     return 'unknown';
   }
 
-  private readFileAsBase64(fileId: string): string | null {
+  private readFileAs(fileId: string, encoding: BufferEncoding): string | null {
     const resolved = this.resolveFilePath(fileId);
 
     if (!resolved) return null;
 
-    return readFileSync(resolved, 'base64');
-  }
-
-  private readFileAsText(fileId: string): string | null {
-    const resolved = this.resolveFilePath(fileId);
-
-    if (!resolved) return null;
-
-    return readFileSync(resolved, 'utf8');
+    return readFileSync(resolved, encoding);
   }
 
   createUploadOptions(type: UploadType): MulterModuleOptions | undefined {
@@ -148,12 +140,12 @@ export class FileService {
 
     switch (strategy) {
       case 'text':
-        return this.readFileAsText(fileId);
+        return this.readFileAs(fileId, 'utf8');
       case 'base64':
-        return this.readFileAsBase64(fileId);
+        return this.readFileAs(fileId, 'base64');
       case 'unknown':
       default:
-        return this.readFileAsBase64(fileId);
+        return this.readFileAs(fileId, 'base64');
     }
   }
 

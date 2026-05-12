@@ -14,7 +14,9 @@ export const BINARY_MIME_TYPES =
 export const TEXT_MIME_TYPES =
   /^(text\/|application\/(json|xml|javascript|x-www-form-urlencoded|graphql|ld\+json))/i;
 
-export const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
-export const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const MB = 1024 * 1024;
+
+export const MAX_IMAGE_SIZE = 5 * MB;
+export const MAX_FILE_SIZE = 10 * MB;
 
 export const MAX_FILE_COUNT = 10;
