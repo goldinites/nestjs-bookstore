@@ -5,14 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { Book } from '@/modules/book/entities/book.entity';
-import {
-  DataSource,
-  EntityManager,
-  FindOptionsWhere,
-  ILike,
-  In,
-  Repository,
-} from 'typeorm';
+import { DataSource, EntityManager, In, Repository } from 'typeorm';
 import { GetBookReqDto } from '@/modules/book/dto/get-book.dto';
 import { getBookDefaultParams } from '@/modules/book/constants/book.constants';
 import { BookErrors } from '@/modules/book/enums/errors.enum';
@@ -41,42 +34,24 @@ export class BookService {
     private readonly bookRepository: Repository<Book>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
-
     private readonly fileService: FileService,
   ) {}
 
-  private searchBooks(whereProp: FindOptionsWhere<Book>, searchQuery?: string) {
-    const queryValue = searchQuery?.trim();
-
-    if (!queryValue) return whereProp;
-
-    const searchWhere: FindOptionsWhere<Book>[] = [];
-
-    for (const field of this.searchFieldsValue) {
-      searchWhere.push({ ...whereProp, [field]: ILike(`%${queryValue}%`) });
-    }
-
-    return searchWhere;
-  }
-
-  private prepareBooksFindWhere(query: GetBookReqDto) {
-    const { q, ...rest } = query;
-
-    const normalizedWhere = normalizeQuery<GetBookReqDto, Book>(rest, {
-      multiFields: this.multiFieldsValue,
-      rangeFields: this.rangeFieldsValue,
-    });
-
-    return this.searchBooks(normalizedWhere, q);
-  }
-
   async getBooks(query?: GetBookReqDto, options: GetBookOptions = {}) {
-    const { field, direction, limit, offset, ...rest } = {
+    const { field, direction, limit, offset, q, ...rest } = {
       ...getBookDefaultParams,
       ...query,
     };
 
-    const where = this.prepareBooksFindWhere(rest);
+    const where = normalizeQuery<GetBookReqDto, Book>({
+      query: rest,
+      searchQuery: q,
+      options: {
+        multiFields: this.multiFieldsValue,
+        rangeFields: this.rangeFieldsValue,
+        searchFieldsValue: this.searchFieldsValue,
+      },
+    });
 
     const { select, relations } = options;
 

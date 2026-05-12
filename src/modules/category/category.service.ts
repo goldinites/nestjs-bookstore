@@ -38,8 +38,11 @@ export class CategoryService {
       ...query,
     };
 
-    const where = normalizeQuery(rest, {
-      multiFields: this.multiFieldsValue,
+    const where = normalizeQuery({
+      query: rest,
+      options: {
+        multiFields: this.multiFieldsValue,
+      },
     });
 
     const { select, relations } = options;
