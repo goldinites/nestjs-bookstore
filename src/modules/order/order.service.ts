@@ -15,7 +15,7 @@ import { OrderItem } from '@/modules/order/entities/order-item.entity';
 import { OrderErrors } from '@/modules/order/enums/errors.enum';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { GetOrderReqDto } from '@/modules/order/dto/get-order.dto';
-import { getOrderDefaultParams } from '@/modules/order/constants/get-order.constants';
+import { getOrderDefaultParams } from '@/modules/order/constants/order.constants';
 import {
   PURCHASES_COUNT_PROPERTY,
   STOCK_COUNT_PROPERTY,

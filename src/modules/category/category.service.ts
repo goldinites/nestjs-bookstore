@@ -10,8 +10,10 @@ import { CreateCategoryDto } from '@/modules/category/dto/create-category.dto';
 import { UpdateCategoryDto } from '@/modules/category/dto/update-category.dto';
 import { CategoryErrors } from '@/modules/category/enums/errors.enum';
 import { GetCategoryReqDto } from '@/modules/category/dto/get-category.dto';
-import { getCategoryDefaultParams } from '@/modules/category/constants/get-category.constants';
+import { getCategoryDefaultParams } from '@/modules/category/constants/category.constants';
 import { normalizeQuery } from '@/modules/utils/query/normalize-query';
+import { GetCategoryOptions } from '@/modules/category/types/category.type';
+import { FileService } from '@/modules/file/file.service';
 
 @Injectable()
 export class CategoryService {
@@ -23,11 +25,13 @@ export class CategoryService {
 
     @InjectDataSource()
     private readonly dataSource: DataSource,
+
+    private readonly fileService: FileService,
   ) {}
 
   async getCategories(
     query?: GetCategoryReqDto,
-    select?: FindOptionsSelect<Category>,
+    options: GetCategoryOptions = {},
   ) {
     const { field, direction, limit, offset, ...rest } = {
       ...getCategoryDefaultParams,
@@ -38,12 +42,14 @@ export class CategoryService {
       multiFields: this.multiFieldsValue,
     });
 
+    const { select, relations } = options;
+
     return await this.categoryRepository.findAndCount({
       where,
       order: { [field]: direction },
       take: limit,
       skip: offset,
-      relations: { books: Boolean(select?.books) },
+      relations,
       select,
     });
   }
@@ -59,10 +65,18 @@ export class CategoryService {
     });
   }
 
-  async createCategory(payload: CreateCategoryDto): Promise<Category> {
+  async createCategory(
+    payload: CreateCategoryDto,
+    image: Express.Multer.File,
+  ): Promise<Category> {
     const category = this.categoryRepository.create(payload);
 
-    const created = await this.categoryRepository.save(category);
+    const imageUrl = this.fileService.createFile(image);
+
+    const created = await this.categoryRepository.save({
+      ...category,
+      imageUrl,
+    });
 
     if (!created) throw new BadRequestException(CategoryErrors.NOT_CREATED);
 
@@ -72,18 +86,28 @@ export class CategoryService {
   async importCategories(payload: CreateCategoryDto[]): Promise<Category[]> {
     const categories = this.categoryRepository.create(payload);
 
-    return await this.categoryRepository.save(categories);
+    const created = await this.categoryRepository.save(categories);
+
+    if (!created) throw new BadRequestException(CategoryErrors.NOT_CREATED);
+
+    return created;
   }
 
   async updateCategory(
     id: number,
     payload: UpdateCategoryDto,
+    image: Express.Multer.File,
   ): Promise<Category> {
     const category = await this.getCategoryById(id);
 
     if (!category) throw new NotFoundException(CategoryErrors.NOT_FOUND);
 
-    const { affected } = await this.categoryRepository.update(id, payload);
+    const imageUrl = this.fileService.createFile(image);
+
+    const { affected } = await this.categoryRepository.update(id, {
+      ...payload,
+      imageUrl,
+    });
 
     if (affected === 0)
       throw new BadRequestException(CategoryErrors.NOT_UPDATED);

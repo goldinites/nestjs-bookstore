@@ -24,6 +24,7 @@ import { CategoryErrors } from '@/modules/category/enums/errors.enum';
 import { BOOKS_COUNT_PROPERTY } from '@/modules/category/constants/category.constants';
 import { ActivationBookDto } from '@/modules/book/dto/activation-book.dto';
 import { GetBookOptions } from '@/modules/book/types/book.type';
+import { FileService } from '@/modules/file/file.service';
 
 @Injectable()
 export class BookService {
@@ -40,6 +41,8 @@ export class BookService {
     private readonly bookRepository: Repository<Book>,
     @InjectDataSource()
     private readonly dataSource: DataSource,
+
+    private readonly fileService: FileService,
   ) {}
 
   private searchBooks(whereProp: FindOptionsWhere<Book>, searchQuery?: string) {
@@ -100,7 +103,10 @@ export class BookService {
     });
   }
 
-  async createBook(payload: CreateBookDto): Promise<Book> {
+  async createBook(
+    payload: CreateBookDto,
+    image?: Express.Multer.File,
+  ): Promise<Book> {
     return await this.dataSource.transaction(async (manager) => {
       const bookRepository = manager.getRepository(Book);
       const categoryRepository = manager.getRepository(Category);
@@ -111,9 +117,12 @@ export class BookService {
 
       if (!category) throw new NotFoundException(CategoryErrors.NOT_FOUND);
 
+      const imageUrl = this.fileService.createFile(image);
+
       const book = bookRepository.create({
         ...rest,
         category,
+        imageUrl,
       });
 
       const { affected } = await manager.increment(
@@ -257,7 +266,11 @@ export class BookService {
     }
   }
 
-  async updateBook(id: number, payload: UpdateBookDto): Promise<Book | null> {
+  async updateBook(
+    id: number,
+    payload: UpdateBookDto,
+    image?: Express.Multer.File,
+  ): Promise<Book | null> {
     return await this.dataSource.transaction(async (manager) => {
       const bookRepository = manager.getRepository(Book);
       const categoryRepository = manager.getRepository(Category);
@@ -287,8 +300,11 @@ export class BookService {
         );
       }
 
+      const imageUrl = this.fileService.createFile(image);
+
       const { affected } = await bookRepository.update(id, {
         ...rest,
+        imageUrl,
         category,
       });
 

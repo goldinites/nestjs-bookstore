@@ -1,4 +1,11 @@
 import { BookResponse } from '@/modules/book/types/book.type';
+import { FindOptionsRelations, FindOptionsSelect } from 'typeorm';
+import { Category } from '@/modules/category/entities/category.entity';
+
+export type GetCategoryOptions = {
+  select?: FindOptionsSelect<Category>;
+  relations?: FindOptionsRelations<Category>;
+};
 
 export type CategoryResponse = {
   id: number;

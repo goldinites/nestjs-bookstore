@@ -16,7 +16,7 @@ import {
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    bufferLogs: false,
+    bufferLogs: process.env.NODE_ENV !== 'development',
   });
 
   if (!existsSync(UPLOADS_PATH)) {

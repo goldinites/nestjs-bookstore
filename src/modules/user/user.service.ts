@@ -10,7 +10,7 @@ import { UserErrors } from '@/modules/user/enums/errors.enum';
 import type { CreateUserDto } from '@/modules/user/dto/create-user.dto';
 import type { UpdateUserDto } from '@/modules/user/dto/update-user.dto';
 import { GetUserReqDto } from '@/modules/user/dto/get-user.dto';
-import { getUserDefaultParams } from '@/modules/user/constants/get-user.constants';
+import { getUserDefaultParams } from '@/modules/user/constants/user.constants';
 import argon2 from 'argon2';
 import { Roles } from '@/modules/user/enums/roles.enum';
 import { GetUserOptions } from '@/modules/user/types/user.type';

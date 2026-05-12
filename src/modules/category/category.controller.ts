@@ -33,17 +33,12 @@ import { Permissions } from '@/modules/auth/decorators/permissions.decorator';
 import { Roles } from '@/modules/user/enums/roles.enum';
 import { FilesUploadInterceptor } from '@/modules/file/interceptors/file-upload.interceptor';
 import { UploadType } from '@/modules/file/enums/upload-type.enum';
-import { prepareFileMetadata } from '@/modules/file/utils/prepare-metadata.util';
-import { FileService } from '@/modules/file/file.service';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Permissions(Roles.ADMIN)
 @Controller('category')
 class CategoryController {
-  constructor(
-    private readonly categoryService: CategoryService,
-    private readonly fileService: FileService,
-  ) {}
+  constructor(private readonly categoryService: CategoryService) {}
 
   @Get()
   async getCategories(
@@ -80,22 +75,12 @@ class CategoryController {
     @UploadedFile()
     image: Express.Multer.File,
   ): Promise<CategoryResponse> {
-    const categoryPayload: CreateCategoryDto = { ...payload };
-
-    if (image) {
-      this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
-
-      categoryPayload.imageUrl = this.fileService.buildPublicUrl(
-        image.filename,
-      );
-    }
-
-    const category = await this.categoryService.createCategory(categoryPayload);
+    const category = await this.categoryService.createCategory(payload, image);
 
     return mapCategoryToResponse(category);
   }
 
-  @Post('categories-import')
+  @Post('categories-import/json')
   async importCategories(
     @Body(new ParseArrayPipe({ items: CreateCategoryDto }))
     payload: CreateCategoryDto[],
@@ -118,18 +103,10 @@ class CategoryController {
     @UploadedFile()
     image: Express.Multer.File,
   ): Promise<CategoryResponse> {
-    const categoryPayload: UpdateCategoryDto = { ...payload };
-    if (image) {
-      this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
-
-      categoryPayload.imageUrl = this.fileService.buildPublicUrl(
-        image.filename,
-      );
-    }
-
     const category = await this.categoryService.updateCategory(
       id,
-      categoryPayload,
+      payload,
+      image,
     );
 
     return mapCategoryToResponse(category);

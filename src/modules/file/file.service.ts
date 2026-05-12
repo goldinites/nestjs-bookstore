@@ -23,6 +23,7 @@ import type { MulterModuleOptions } from '@nestjs/platform-express';
 import { FileErrors } from '@/modules/file/enums/errors.enum';
 import { diskStorage } from 'multer';
 import { randomUUID } from 'crypto';
+import { prepareFileMetadata } from '@/modules/file/utils/prepare-metadata.util';
 
 @Injectable()
 export class FileService {
@@ -154,6 +155,13 @@ export class FileService {
       default:
         return this.readFileAsBase64(fileId);
     }
+  }
+
+  createFile(file?: Express.Multer.File): string | undefined {
+    if (!file) return;
+
+    this.saveMetadata(file.filename, prepareFileMetadata(file));
+    return this.buildPublicUrl(file.filename);
   }
 
   removeFile(fileId: string): void {

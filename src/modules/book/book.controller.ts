@@ -30,20 +30,13 @@ import {
   mapBookToResponse,
 } from '@/modules/book/mappers/book-to-response.mapper';
 import { BookErrors } from '@/modules/book/enums/errors.enum';
-import { FileService } from '@/modules/file/file.service';
 import { UploadType } from '@/modules/file/enums/upload-type.enum';
 import { FilesUploadInterceptor } from '@/modules/file/interceptors/file-upload.interceptor';
-import { prepareFileMetadata } from '@/modules/file/utils/prepare-metadata.util';
-import { ReviewService } from '@/modules/book/services/review.service';
 import { ActivationBookDto } from '@/modules/book/dto/activation-book.dto';
 
 @Controller('book')
 export class BookController {
-  constructor(
-    private readonly bookService: BookService,
-    private readonly reviewService: ReviewService,
-    private readonly fileService: FileService,
-  ) {}
+  constructor(private readonly bookService: BookService) {}
 
   @Get()
   async getBooks(@Query() query: GetBookReqDto): Promise<GetBooksResponse> {
@@ -81,22 +74,14 @@ export class BookController {
     @UploadedFile()
     image: Express.Multer.File,
   ): Promise<BookResponse> {
-    const bookPayload: CreateBookDto = { ...payload };
-
-    if (image) {
-      this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
-
-      bookPayload.imageUrl = this.fileService.buildPublicUrl(image.filename);
-    }
-
-    const book: Book = await this.bookService.createBook(bookPayload);
+    const book: Book = await this.bookService.createBook(payload, image);
 
     return mapBookToResponse(book);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Permissions(Roles.ADMIN)
-  @Post('books-import')
+  @Post('books-import/json')
   async importBooks(
     @Body(new ParseArrayPipe({ items: CreateBookDto }))
     payload: CreateBookDto[],
@@ -121,17 +106,10 @@ export class BookController {
     @UploadedFile()
     image: Express.Multer.File,
   ): Promise<BookResponse> {
-    const bookPayload: UpdateBookDto = { ...payload };
-
-    if (image) {
-      this.fileService.saveMetadata(image.filename, prepareFileMetadata(image));
-
-      bookPayload.imageUrl = this.fileService.buildPublicUrl(image.filename);
-    }
-
     const book: Book | null = await this.bookService.updateBook(
       id,
-      bookPayload,
+      payload,
+      image,
     );
 
     if (!book) throw new BadRequestException(BookErrors.NOT_UPDATED);

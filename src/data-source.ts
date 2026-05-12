@@ -1,11 +1,11 @@
 import 'reflect-metadata';
 import { DataSource } from 'typeorm';
-import { config as dotenvConfig } from 'dotenv';
+import { config } from 'dotenv';
 import { join } from 'path';
 import { DEFAULT_DB_PORT } from '@/modules/app/constants/app.constants';
 import { ensureNonEmpty } from '@/modules/utils/ensure-non-empty';
 
-dotenvConfig();
+config();
 
 const port = Number(process.env.DB_PORT);
 
